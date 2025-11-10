@@ -7,6 +7,7 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  AlertTitle,
 } from '@mui/material';
 import {
   Phone as PhoneIcon,
@@ -16,12 +17,14 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getStats, healthCheck } from '../api/client';
 import type { Stats, HealthResponse } from '../types';
+import { mockStats, mockHealth } from '../mockData';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usingMockData, setUsingMockData] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,8 +37,17 @@ export default function Dashboard() {
         setStats(statsData);
         setHealth(healthData);
         setError(null);
+        setUsingMockData(false);
       } catch (err) {
-        setError('Failed to fetch data from server');
+        // In development, use mock data when API is unavailable
+        if (import.meta.env.DEV) {
+          setStats(mockStats);
+          setHealth(mockHealth);
+          setUsingMockData(true);
+          setError(null);
+        } else {
+          setError('Failed to fetch data from server');
+        }
         console.error(err);
       } finally {
         setLoading(false);
@@ -80,18 +92,30 @@ export default function Dashboard() {
         Dashboard
       </Typography>
 
+      {usingMockData && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <AlertTitle>Development Mode</AlertTitle>
+          Using mock data. Start the RusTalk server to see real data.
+        </Alert>
+      )}
+
       <Grid container spacing={3}>
         {/* Active Calls */}
         <Grid item xs={12} md={4}>
-          <Card>
+          <Card sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+          }}>
             <CardContent>
               <Box display="flex" alignItems="center" mb={2}>
-                <PhoneIcon color="primary" sx={{ fontSize: 40, mr: 2 }} />
+                <PhoneIcon sx={{ fontSize: 48, mr: 2, opacity: 0.9 }} />
                 <div>
-                  <Typography color="textSecondary" variant="body2">
+                  <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 500 }}>
                     Active Calls
                   </Typography>
-                  <Typography variant="h4">{stats?.active_calls || 0}</Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                    {stats?.active_calls || 0}
+                  </Typography>
                 </div>
               </Box>
             </CardContent>
@@ -100,15 +124,20 @@ export default function Dashboard() {
 
         {/* Total Calls Today */}
         <Grid item xs={12} md={4}>
-          <Card>
+          <Card sx={{
+            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            color: 'white',
+          }}>
             <CardContent>
               <Box display="flex" alignItems="center" mb={2}>
-                <TrendingUpIcon color="success" sx={{ fontSize: 40, mr: 2 }} />
+                <TrendingUpIcon sx={{ fontSize: 48, mr: 2, opacity: 0.9 }} />
                 <div>
-                  <Typography color="textSecondary" variant="body2">
+                  <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 500 }}>
                     Calls Today
                   </Typography>
-                  <Typography variant="h4">{stats?.total_calls_today || 0}</Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                    {stats?.total_calls_today || 0}
+                  </Typography>
                 </div>
               </Box>
             </CardContent>
@@ -117,15 +146,18 @@ export default function Dashboard() {
 
         {/* Uptime */}
         <Grid item xs={12} md={4}>
-          <Card>
+          <Card sx={{
+            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            color: 'white',
+          }}>
             <CardContent>
               <Box display="flex" alignItems="center" mb={2}>
-                <TimerIcon color="info" sx={{ fontSize: 40, mr: 2 }} />
+                <TimerIcon sx={{ fontSize: 48, mr: 2, opacity: 0.9 }} />
                 <div>
-                  <Typography color="textSecondary" variant="body2">
+                  <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 500 }}>
                     Uptime
                   </Typography>
-                  <Typography variant="h6">
+                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
                     {stats?.uptime_seconds ? formatUptime(stats.uptime_seconds) : 'N/A'}
                   </Typography>
                 </div>

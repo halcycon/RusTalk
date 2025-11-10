@@ -7,6 +7,7 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  AlertTitle,
 } from '@mui/material';
 import {
   BarChart,
@@ -25,13 +26,15 @@ import {
 } from 'recharts';
 import { getStats } from '../api/client';
 import type { Stats } from '../types';
+import { mockStats } from '../mockData';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'];
 
 export default function Statistics() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usingMockData, setUsingMockData] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -40,8 +43,16 @@ export default function Statistics() {
         const data = await getStats();
         setStats(data);
         setError(null);
+        setUsingMockData(false);
       } catch (err) {
-        setError('Failed to fetch statistics from server');
+        // In development, use mock data when API is unavailable
+        if (import.meta.env.DEV) {
+          setStats(mockStats);
+          setUsingMockData(true);
+          setError(null);
+        } else {
+          setError('Failed to fetch statistics from server');
+        }
         console.error(err);
       } finally {
         setLoading(false);
@@ -88,6 +99,13 @@ export default function Statistics() {
       <Typography variant="h4" gutterBottom>
         Statistics & Analytics
       </Typography>
+
+      {usingMockData && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <AlertTitle>Development Mode</AlertTitle>
+          Using mock data. Start the RusTalk server to see real statistics.
+        </Alert>
+      )}
 
       <Grid container spacing={3}>
         {/* Hourly Call Volume */}

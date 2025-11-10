@@ -14,9 +14,11 @@ import {
   Chip,
   CircularProgress,
   Alert,
+  AlertTitle,
 } from '@mui/material';
 import { getCalls } from '../api/client';
 import type { CallInfo } from '../types';
+import { mockCalls } from '../mockData';
 
 const getStatusColor = (status: string): 'default' | 'primary' | 'success' | 'error' | 'warning' => {
   switch (status) {
@@ -37,6 +39,7 @@ export default function Calls() {
   const [calls, setCalls] = useState<CallInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usingMockData, setUsingMockData] = useState(false);
 
   useEffect(() => {
     const fetchCalls = async () => {
@@ -45,8 +48,16 @@ export default function Calls() {
         const data = await getCalls();
         setCalls(data);
         setError(null);
+        setUsingMockData(false);
       } catch (err) {
-        setError('Failed to fetch calls from server');
+        // In development, use mock data when API is unavailable
+        if (import.meta.env.DEV) {
+          setCalls(mockCalls);
+          setUsingMockData(true);
+          setError(null);
+        } else {
+          setError('Failed to fetch calls from server');
+        }
         console.error(err);
       } finally {
         setLoading(false);
@@ -87,6 +98,13 @@ export default function Calls() {
       <Typography variant="h4" gutterBottom>
         Active Calls
       </Typography>
+
+      {usingMockData && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <AlertTitle>Development Mode</AlertTitle>
+          Using mock data. Start the RusTalk server to see real calls.
+        </Alert>
+      )}
 
       <Card>
         <CardContent>
