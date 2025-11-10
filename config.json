@@ -1,0 +1,37 @@
+{
+  "server": {
+    "bind_address": "0.0.0.0",
+    "bind_port": 5060,
+    "workers": 4
+  },
+  "sip": {
+    "domain": "rustalk.local",
+    "user_agent": "RusTalk/0.1.0",
+    "max_forwards": 70,
+    "session_expires": 1800
+  },
+  "transport": {
+    "protocols": [
+      "udp",
+      "tcp",
+      "tls"
+    ],
+    "udp_port": 5060,
+    "tcp_port": 5060,
+    "tls_port": 5061,
+    "tls_cert": "/etc/rustalk/cert.pem",
+    "tls_key": "/etc/rustalk/key.pem"
+  },
+  "database": {
+    "url": "postgresql://rustalk:password@localhost/rustalk",
+    "max_connections": 10,
+    "min_connections": 2
+  },
+  "teams": {
+    "enabled": true,
+    "sbc_fqdn": "sbc.example.com",
+    "mtls_cert": "/etc/rustalk/teams-cert.pem",
+    "mtls_key": "/etc/rustalk/teams-key.pem",
+    "trunk_fqdn": "sip.pstnhub.microsoft.com"
+  }
+}
