@@ -66,28 +66,22 @@ export default function Statistics() {
     return <Alert severity="error">{error}</Alert>;
   }
 
-  // Mock data for demonstration
-  const hourlyCallData = [
-    { hour: '00:00', inbound: 12, outbound: 8 },
-    { hour: '04:00', inbound: 5, outbound: 3 },
-    { hour: '08:00', inbound: 35, outbound: 28 },
-    { hour: '12:00', inbound: 58, outbound: 52 },
-    { hour: '16:00', inbound: 48, outbound: 42 },
-    { hour: '20:00', inbound: 32, outbound: 28 },
-  ];
-
+  // Historical data should come from dedicated API endpoints
+  // TODO: Implement these API endpoints:
+  // - /api/v1/stats/hourly - for hourly call volume
+  // - /api/v1/stats/status - for call status distribution  
+  // - /api/v1/stats/performance - for performance metrics
+  // - /api/v1/stats/resources - for resource usage trends
+  
+  // Showing basic status based on available API data
   const callStatusData = [
-    { name: 'Successful', value: stats?.total_calls_today ? Math.floor(stats.total_calls_today * 0.85) : 85 },
-    { name: 'Failed', value: stats?.total_calls_today ? Math.floor(stats.total_calls_today * 0.10) : 10 },
-    { name: 'Busy', value: stats?.total_calls_today ? Math.floor(stats.total_calls_today * 0.05) : 5 },
+    { name: 'Active', value: stats?.active_calls || 0 },
+    { name: 'Today Total', value: stats?.total_calls_today || 0 },
   ];
 
-  const performanceData = [
-    { metric: 'Avg Call Duration', value: 185 },
-    { metric: 'Setup Time (ms)', value: 250 },
-    { metric: 'Jitter (ms)', value: 12 },
-    { metric: 'Packet Loss (%)', value: 0.5 },
-  ];
+  // Empty data arrays - these should be populated by API endpoints
+  const hourlyCallData: Array<{ hour: string; inbound: number; outbound: number }> = [];
+  const performanceData: Array<{ metric: string; value: number }> = [];
 
   return (
     <Box>
@@ -103,17 +97,25 @@ export default function Statistics() {
               <Typography variant="h6" gutterBottom>
                 Hourly Call Volume
               </Typography>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={hourlyCallData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="inbound" fill="#8884d8" />
-                  <Bar dataKey="outbound" fill="#82ca9d" />
-                </BarChart>
-              </ResponsiveContainer>
+              {hourlyCallData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={hourlyCallData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="hour" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="inbound" fill="#8884d8" />
+                    <Bar dataKey="outbound" fill="#82ca9d" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <Box display="flex" justifyContent="center" alignItems="center" height={350}>
+                  <Alert severity="info">
+                    Historical call data not available. API endpoint needed: /api/v1/stats/hourly
+                  </Alert>
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Grid>
@@ -155,16 +157,24 @@ export default function Statistics() {
               <Typography variant="h6" gutterBottom>
                 Performance Metrics
               </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={performanceData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="metric" type="category" width={150} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="value" fill="#8884d8" />
-                </BarChart>
-              </ResponsiveContainer>
+              {performanceData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={performanceData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="metric" type="category" width={150} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="value" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <Box display="flex" justifyContent="center" alignItems="center" height={300}>
+                  <Alert severity="info">
+                    Performance metrics not available. API endpoint needed: /api/v1/stats/performance
+                  </Alert>
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Grid>
@@ -176,27 +186,29 @@ export default function Statistics() {
               <Typography variant="h6" gutterBottom>
                 Resource Usage Trends
               </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart
-                  data={[
-                    { time: '00:00', cpu: 15, memory: 25 },
-                    { time: '04:00', cpu: 12, memory: 23 },
-                    { time: '08:00', cpu: 35, memory: 40 },
-                    { time: '12:00', cpu: 45, memory: 55 },
-                    { time: '16:00', cpu: 38, memory: 48 },
-                    { time: '20:00', cpu: 28, memory: 35 },
-                    { time: '23:59', cpu: stats?.cpu_usage || 20, memory: stats?.memory_usage || 30 },
-                  ]}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="cpu" stroke="#8884d8" name="CPU %" />
-                  <Line type="monotone" dataKey="memory" stroke="#82ca9d" name="Memory %" />
-                </LineChart>
-              </ResponsiveContainer>
+              {stats?.cpu_usage !== undefined && stats?.memory_usage !== undefined ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart
+                    data={[
+                      { time: 'Current', cpu: stats.cpu_usage, memory: stats.memory_usage },
+                    ]}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="time" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="cpu" stroke="#8884d8" name="CPU %" />
+                    <Line type="monotone" dataKey="memory" stroke="#82ca9d" name="Memory %" />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <Box display="flex" justifyContent="center" alignItems="center" height={300}>
+                  <Alert severity="info">
+                    Resource usage history not available. API endpoint needed: /api/v1/stats/resources
+                  </Alert>
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Grid>

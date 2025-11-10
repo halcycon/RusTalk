@@ -47,9 +47,16 @@ export default function Layout({ children }: LayoutProps) {
   const drawer = (
     <div>
       <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          RusTalk
-        </Typography>
+        <Box display="flex" alignItems="center" width="100%" gap={1}>
+          <img 
+            src="https://github.com/user-attachments/assets/e096d831-7060-4a74-bc72-b52a49cecc8b" 
+            alt="RusTalk Logo" 
+            style={{ height: '40px', width: '40px', objectFit: 'contain' }}
+          />
+          <Typography variant="h6" noWrap component="div">
+            RusTalk
+          </Typography>
+        </Box>
       </Toolbar>
       <List>
         {menuItems.map((item) => (

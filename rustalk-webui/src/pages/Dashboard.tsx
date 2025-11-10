@@ -67,15 +67,11 @@ export default function Dashboard() {
     return <Alert severity="error">{error}</Alert>;
   }
 
-  // Generate mock data for the chart (in a real app, this would come from the API)
+  // Chart data should come from a historical API endpoint
+  // For now, showing current active calls as the latest data point
+  // TODO: Add API endpoint for historical call data (e.g., /api/v1/stats/history)
   const chartData = [
-    { time: '00:00', calls: 12 },
-    { time: '04:00', calls: 8 },
-    { time: '08:00', calls: 25 },
-    { time: '12:00', calls: 45 },
-    { time: '16:00', calls: 38 },
-    { time: '20:00', calls: 22 },
-    { time: '23:59', calls: stats?.active_calls || 0 },
+    { time: 'Now', calls: stats?.active_calls || 0 },
   ];
 
   return (
