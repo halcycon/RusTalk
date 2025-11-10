@@ -1,7 +1,6 @@
-# RusTalk
 <img width="480" height="480" alt="RusTalk Logo" src="https://github.com/user-attachments/assets/e096d831-7060-4a74-bc72-b52a49cecc8b" />
 
-
+# RusTalk
 A high-performance SIP B2BUA / PBX / MS-Teams-compatible SBC built from the ground up in Rust. That tone you can hear? It's the sound of memory-safety.
 
 ## Features
@@ -12,17 +11,19 @@ A high-performance SIP B2BUA / PBX / MS-Teams-compatible SBC built from the grou
 - **Microsoft Teams**: Direct Routing support with mTLS authentication
 - **SRTP**: Secure RTP pass-through without media decryption
 - **Modular**: Separate crates for core engine, edge SBC, cloud API, and CLI
+- **Web UI**: Modern React-based admin console with real-time dashboards
 - **Configuration**: JSON-based config with PostgreSQL database overlay
 - **TLS/mTLS**: Secure SIP (SIPS) using rustls
 
 ## Architecture
 
-RusTalk consists of four modular crates:
+RusTalk consists of four modular crates plus a modern Web UI:
 
 1. **rustalk-core**: Core SIP engine and B2BUA implementation
 2. **rustalk-edge**: Session Border Controller with Teams gateway
 3. **rustalk-cloud**: REST API service for management and monitoring
 4. **rustalk-cli**: Command-line administration tool
+5. **rustalk-webui**: React-based admin console with real-time monitoring
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 
@@ -175,6 +176,49 @@ rustalk status --server http://localhost:8080
 rustalk list-calls --server http://localhost:8080
 ```
 
+## Web UI
+
+RusTalk includes a modern React-based administration console.
+
+### Features
+
+- **Dashboard**: Real-time system overview with call statistics and metrics
+- **Call Management**: Monitor active calls with status indicators
+- **Configuration**: Manage all system settings through an intuitive interface
+- **Statistics**: Visual charts and graphs for performance analysis
+
+### Access the Web UI
+
+1. Build the Web UI:
+   ```bash
+   cd rustalk-webui
+   npm install
+   npm run build
+   ```
+
+2. Start the Cloud API server (it will automatically serve the Web UI):
+   ```bash
+   rustalk start --config config.json
+   ```
+
+3. Open your browser and navigate to:
+   ```
+   http://localhost:8080
+   ```
+
+### Development Mode
+
+For frontend development with hot reload:
+
+```bash
+cd rustalk-webui
+npm run dev
+```
+
+The UI will be available at http://localhost:3000 with API requests proxied to the backend.
+
+See [rustalk-webui/README.md](rustalk-webui/README.md) for more details.
+
 ## SIP Methods Supported
 
 - **INVITE**: Establish new calls
@@ -272,6 +316,14 @@ RusTalk/
 │   ├── src/
 │   │   └── main.rs
 │   └── Cargo.toml
+├── rustalk-webui/      # Web admin console
+│   ├── src/
+│   │   ├── api/        # API client
+│   │   ├── components/ # React components
+│   │   ├── pages/      # Page components
+│   │   └── types/      # TypeScript types
+│   ├── dist/           # Build output
+│   └── package.json
 ├── config.json         # Sample configuration
 ├── ARCHITECTURE.md     # Architecture documentation
 ├── Cargo.toml          # Workspace configuration
@@ -320,12 +372,21 @@ MIT License - See LICENSE file for details.
 ## Credits
 
 Built with:
+
+**Backend:**
 - [tokio](https://tokio.rs/) - Async runtime
 - [rustls](https://github.com/rustls/rustls) - TLS implementation
 - [axum](https://github.com/tokio-rs/axum) - Web framework
 - [sqlx](https://github.com/launchbadge/sqlx) - Async SQL
 - [nom](https://github.com/rust-bakery/nom) - Parser combinators
 - [clap](https://github.com/clap-rs/clap) - CLI framework
+
+**Frontend:**
+- [React](https://react.dev/) - UI library
+- [Material-UI](https://mui.com/) - Component library
+- [Recharts](https://recharts.org/) - Charts library
+- [Vite](https://vite.dev/) - Build tool
+- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
 
 ## Status
 
@@ -334,6 +395,7 @@ This is an initial implementation providing core SIP/SBC functionality. Future e
 - [ ] WebRTC gateway
 - [ ] SIP over WebSocket
 - [ ] Advanced routing rules
-- [ ] Web UI
+- [x] Web UI with real-time dashboards
+- [ ] WebSocket support for live updates
 - [ ] Prometheus metrics
 - [ ] OpenTelemetry tracing

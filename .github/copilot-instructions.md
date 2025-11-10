@@ -5,6 +5,8 @@
 RusTalk is a high-performance SIP B2BUA (Back-to-Back User Agent), PBX, and Microsoft Teams-compatible Session Border Controller (SBC) built entirely in Rust. The project emphasizes memory safety, performance, and modern cloud-native architecture.
 
 **Key Technologies:**
+
+**Backend:**
 - Language: Rust 2021 Edition
 - Async Runtime: tokio (full async I/O)
 - TLS/mTLS: rustls (modern, safe TLS)
@@ -14,9 +16,16 @@ RusTalk is a high-performance SIP B2BUA (Back-to-Back User Agent), PBX, and Micr
 - Web Framework: axum
 - CLI: clap
 
+**Frontend:**
+- Framework: React 19 with TypeScript
+- UI Library: Material-UI v6
+- Charts: Recharts
+- Build Tool: Vite
+- Router: React Router
+
 ## Project Structure
 
-This is a Cargo workspace with four main crates:
+This is a Cargo workspace with four main crates plus a React-based Web UI:
 
 ### 1. `rustalk-core/` - Core SIP Engine
 The heart of the platform, providing:
@@ -55,6 +64,16 @@ Administration tool with commands:
 - `console` - Interactive console mode
 - `status` - Monitor server status
 - `list-calls` - Show active calls
+
+### 5. `rustalk-webui/` - Web Admin Console
+Modern React-based administration interface:
+- **Dashboard**: Real-time system overview with metrics (`src/pages/Dashboard.tsx`)
+- **Call Management**: Monitor active calls (`src/pages/Calls.tsx`)
+- **Configuration**: Manage all settings (`src/pages/Configuration.tsx`)
+- **Statistics**: Visual analytics with charts (`src/pages/Statistics.tsx`)
+- **API Client**: Integration with REST API (`src/api/client.ts`)
+- **Components**: Reusable UI components (`src/components/`)
+- **TypeScript Types**: Shared type definitions (`src/types/`)
 
 ## Architecture Principles
 
@@ -271,12 +290,72 @@ cargo fmt --all                # Format code
 4. **TLS Configuration**: Use modern cipher suites only
 5. **mTLS for Teams**: Required for production Teams integration
 
+## Working with the Web UI
+
+### Development Workflow
+```bash
+cd rustalk-webui
+npm install              # Install dependencies
+npm run dev             # Start dev server on http://localhost:3000
+npm run build           # Build for production
+npm run lint            # Lint TypeScript/React code
+```
+
+### Web UI Architecture
+- **React 19** with functional components and hooks
+- **Material-UI v6** for consistent UI design
+- **TypeScript** for type safety
+- **Vite** for fast builds and HMR
+- **Recharts** for data visualization
+- **React Router** for client-side routing
+
+### Key Files
+- `src/App.tsx` - Main app with routing
+- `src/components/Layout.tsx` - Sidebar navigation layout
+- `src/pages/*.tsx` - Page components for each route
+- `src/api/client.ts` - Axios client for REST API
+- `src/types/index.ts` - TypeScript type definitions
+- `vite.config.ts` - Vite configuration with API proxy
+
+### Best Practices for Web UI
+1. **Use Material-UI components** - Don't create custom styled components unnecessarily
+2. **Keep API calls in pages** - Components should receive props
+3. **Use TypeScript types** - Always type props, state, and API responses
+4. **Follow React hooks rules** - Don't call hooks conditionally
+5. **Handle loading states** - Show CircularProgress while fetching data
+6. **Handle error states** - Display Alert components for errors
+7. **Auto-refresh data** - Use setInterval for real-time updates
+8. **Responsive design** - Use Material-UI Grid with xs/md/lg breakpoints
+
+### Integrating Frontend Changes
+When the backend API changes:
+1. Update `src/types/index.ts` with new types
+2. Update `src/api/client.ts` with new endpoints
+3. Update relevant page components to use new data
+4. Test with the development proxy
+
+### Serving Web UI from Rust
+The `rustalk-cloud` API server serves the built Web UI:
+```rust
+let api = CloudApi::new("0.0.0.0:8080".parse().unwrap())
+    .with_webui_path("rustalk-webui/dist".to_string());
+```
+
 ## VS Code Extensions Recommended
 
+**Rust Development:**
 - rust-analyzer: Rust language support
 - CodeLLDB: Debugging support
 - Even Better TOML: Cargo.toml editing
 - Error Lens: Inline error display
+
+**Web UI Development:**
+- ESLint: JavaScript/TypeScript linting
+- Prettier: Code formatting
+- TypeScript Vue Plugin: TypeScript support
+- ES7+ React/Redux/React-Native snippets: React snippets
+
+**General:**
 - GitLens: Git integration
 
 ## Additional Resources
