@@ -98,6 +98,51 @@ rustalk start --config config.json
 
 ## CLI Commands
 
+### Interactive Console
+
+Enter an interactive console mode similar to FreeSWITCH's fs_cli:
+
+```bash
+rustalk console --config config.json
+```
+
+The console provides a powerful interactive shell with:
+- **Command history** - Navigate previous commands with arrow keys
+- **Line editing** - Edit commands with standard editing keys
+- **Tab completion** - Auto-complete commands (via rustyline)
+- **Help system** - Type `help` or `?` for available commands
+
+#### Console Commands
+
+**Show Commands:**
+```
+show acls              - Display access control lists
+show profiles          - Display SIP profiles
+show status            - Display server status
+show calls             - Display active calls
+```
+
+**Profile Management:**
+```
+profile <name> start   - Start a SIP profile
+profile <name> stop    - Stop a SIP profile
+profile <name> restart - Restart a SIP profile
+profile <name> rescan  - Rescan a SIP profile
+```
+
+**Module Management:**
+```
+load <module>          - Load a module
+unload <module>        - Unload a module
+reload <module>        - Reload a module
+```
+
+**General:**
+```
+help, ?                - Display help
+exit, quit, q          - Exit the console
+```
+
 ### Start Server
 
 ```bash
