@@ -1,5 +1,7 @@
 //! RusTalk CLI - Admin tool for managing RusTalk SIP servers
 
+mod console;
+
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 use rustalk_core::prelude::{Config, B2BUA};
@@ -17,6 +19,12 @@ struct Cli {
 enum Commands {
     /// Start the SIP server
     Start {
+        /// Configuration file path
+        #[arg(short, long, default_value = "config.json")]
+        config: PathBuf,
+    },
+    /// Enter interactive console mode
+    Console {
         /// Configuration file path
         #[arg(short, long, default_value = "config.json")]
         config: PathBuf,
@@ -59,6 +67,9 @@ async fn main() -> Result<()> {
         Commands::Start { config } => {
             println!("Starting RusTalk server with config: {}", config.display());
             start_server(config).await?;
+        }
+        Commands::Console { config } => {
+            console::run_console(config).await?;
         }
         Commands::CheckConfig { config } => {
             println!("Checking configuration: {}", config.display());
