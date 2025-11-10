@@ -1,6 +1,6 @@
-# RusTalk
 <img width="480" height="480" alt="RusTalk Logo" src="https://github.com/user-attachments/assets/e096d831-7060-4a74-bc72-b52a49cecc8b" />
 
+# RusTalk
 A high-performance SIP B2BUA / PBX / MS-Teams-compatible SBC built from the ground up in Rust. That tone you can hear? It's the sound of memory-safety.
 
 ## Features
