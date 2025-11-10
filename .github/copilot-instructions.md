@@ -521,3 +521,40 @@ cargo tree -p rustalk-core
 - [The Rust Book](https://doc.rust-lang.org/book/) - Official Rust documentation
 - [Rust Async Book](https://rust-lang.github.io/async-book/) - Understanding async/await
 - [Tokio Tutorial](https://tokio.rs/tokio/tutorial) - Async runtime documentation
+
+## Optional: Custom Agents
+
+Custom agents are specialized Copilot configurations for specific types of tasks. They are optional but can be useful for complex or repetitive workflows. If needed in the future, custom agents can be added to `.github/agents/` directory.
+
+### Potential Custom Agents for RusTalk
+
+**Example: SIP Protocol Expert**
+Could handle complex SIP message parsing, RFC compliance validation, and protocol-specific implementations.
+
+**Example: Async Rust Expert**
+Could specialize in tokio patterns, async/await optimization, and concurrent programming patterns.
+
+**Example: Test Generator**
+Could focus on generating comprehensive test suites, including unit tests, integration tests, and edge cases.
+
+### How to Add Custom Agents
+
+To add a custom agent:
+1. Create `.github/agents/` directory
+2. Add a markdown file for each agent (e.g., `sip-expert.md`)
+3. Include agent metadata and instructions:
+```markdown
+---
+name: sip-expert
+description: Expert in SIP protocol implementation and RFC compliance
+---
+
+You are a specialized agent for SIP protocol implementation...
+[Detailed instructions for the agent]
+```
+
+For more information, see:
+- [GitHub Docs: Custom Agents](https://docs.github.com/en/copilot/customizing-copilot/adding-custom-instructions-for-github-copilot)
+- [Best practices for custom agents](https://github.blog/ai-and-ml/github-copilot/from-chaos-to-clarity-using-github-copilot-agents-to-improve-developer-workflows/)
+
+**Note:** The current comprehensive instructions should be sufficient for most development tasks. Custom agents should only be added if there's a clear need for specialized expertise in specific domains.
