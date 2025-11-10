@@ -1,0 +1,117 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "cargo build",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["build", "--workspace"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "cargo build --release",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["build", "--workspace", "--release"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "cargo test",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["test", "--workspace"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "cargo test (single crate)",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["test", "-p", "${input:crateName}"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "cargo clippy",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["clippy", "--workspace", "--all-targets"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "cargo fmt",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["fmt", "--all"],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "cargo check",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["check", "--workspace"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "cargo doc",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["doc", "--workspace", "--no-deps", "--open"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$rustc"]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "crateName",
+      "type": "pickString",
+      "description": "Select crate to test",
+      "options": [
+        "rustalk-core",
+        "rustalk-edge",
+        "rustalk-cloud",
+        "rustalk-cli"
+      ],
+      "default": "rustalk-core"
+    }
+  ]
+}

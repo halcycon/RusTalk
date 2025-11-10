@@ -1,0 +1,117 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug rustalk-cli",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=rustalk",
+          "--package=rustalk-cli"
+        ],
+        "filter": {
+          "name": "rustalk",
+          "kind": "bin"
+        }
+      },
+      "args": ["--help"],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug rustalk-cli console",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=rustalk",
+          "--package=rustalk-cli"
+        ],
+        "filter": {
+          "name": "rustalk",
+          "kind": "bin"
+        }
+      },
+      "args": ["console", "--config", "config.json"],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in rustalk-core",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--lib",
+          "--package=rustalk-core"
+        ],
+        "filter": {
+          "name": "rustalk-core",
+          "kind": "lib"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in rustalk-edge",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--lib",
+          "--package=rustalk-edge"
+        ],
+        "filter": {
+          "name": "rustalk-edge",
+          "kind": "lib"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in rustalk-cloud",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--lib",
+          "--package=rustalk-cloud"
+        ],
+        "filter": {
+          "name": "rustalk-cloud",
+          "kind": "lib"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in rustalk-cli",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=rustalk",
+          "--package=rustalk-cli"
+        ],
+        "filter": {
+          "name": "rustalk",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

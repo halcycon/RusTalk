@@ -1,0 +1,47 @@
+{
+  // Rust-specific settings
+  "rust-analyzer.checkOnSave.command": "clippy",
+  "rust-analyzer.cargo.features": "all",
+  "rust-analyzer.cargo.allTargets": true,
+  
+  // Format on save
+  "editor.formatOnSave": true,
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    "editor.formatOnSave": true
+  },
+  
+  // File associations
+  "files.associations": {
+    "*.toml": "toml",
+    "Cargo.lock": "toml"
+  },
+  
+  // Exclude build artifacts from search
+  "search.exclude": {
+    "**/target": true,
+    "**/Cargo.lock": true
+  },
+  
+  // Exclude build artifacts from file watcher
+  "files.watcherExclude": {
+    "**/target/**": true
+  },
+  
+  // Show whitespace
+  "editor.renderWhitespace": "boundary",
+  
+  // Recommended line length for Rust
+  "editor.rulers": [100],
+  
+  // Terminal settings for cargo commands
+  "terminal.integrated.env.linux": {
+    "RUST_BACKTRACE": "1"
+  },
+  "terminal.integrated.env.osx": {
+    "RUST_BACKTRACE": "1"
+  },
+  "terminal.integrated.env.windows": {
+    "RUST_BACKTRACE": "1"
+  }
+}

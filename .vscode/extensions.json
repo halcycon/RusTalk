@@ -1,0 +1,23 @@
+{
+  "recommendations": [
+    // Essential Rust development
+    "rust-lang.rust-analyzer",
+    "vadimcn.vscode-lldb",
+    
+    // TOML support for Cargo files
+    "tamasfe.even-better-toml",
+    
+    // Enhanced error display
+    "usernamehw.errorlens",
+    
+    // Git integration
+    "eamodio.gitlens",
+    
+    // GitHub Copilot (if available)
+    "github.copilot",
+    "github.copilot-chat",
+    
+    // Code formatting and linting
+    "editorconfig.editorconfig"
+  ]
+}
