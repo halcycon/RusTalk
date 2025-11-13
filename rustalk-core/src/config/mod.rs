@@ -3,7 +3,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tokio::fs;
 
 /// Main configuration structure
@@ -14,6 +14,7 @@ pub struct Config {
     pub transport: TransportSettings,
     pub database: Option<DatabaseConfig>,
     pub teams: Option<TeamsConfig>,
+    pub acme: Option<AcmeConfig>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -55,6 +56,45 @@ pub struct TeamsConfig {
     pub mtls_cert: String,
     pub mtls_key: String,
     pub trunk_fqdn: String,
+}
+
+/// ACME/Let's Encrypt configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AcmeConfig {
+    /// Enable ACME certificate management
+    pub enabled: bool,
+    /// Email for Let's Encrypt account and notifications
+    pub email: String,
+    /// Domain names to request certificates for
+    pub domains: Vec<String>,
+    /// Directory to store certificates
+    pub cert_dir: PathBuf,
+    /// Directory to store ACME account data
+    pub account_dir: PathBuf,
+    /// Use Let's Encrypt staging environment (for testing)
+    pub use_staging: bool,
+    /// HTTP challenge validation port (default: 80)
+    pub http_challenge_port: u16,
+    /// Challenge type: "http-01" or "dns-01"
+    pub challenge_type: String,
+    /// Auto-renew certificates (days before expiry)
+    pub auto_renew_days: u32,
+}
+
+impl Default for AcmeConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            email: String::new(),
+            domains: Vec::new(),
+            cert_dir: PathBuf::from("/etc/rustalk/certs"),
+            account_dir: PathBuf::from("/etc/rustalk/acme"),
+            use_staging: false,
+            http_challenge_port: 80,
+            challenge_type: "http-01".to_string(),
+            auto_renew_days: 30,
+        }
+    }
 }
 
 impl Config {
@@ -130,6 +170,7 @@ impl Default for Config {
             },
             database: None,
             teams: None,
+            acme: None,
         }
     }
 }
