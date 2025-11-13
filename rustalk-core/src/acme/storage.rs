@@ -28,6 +28,7 @@ pub struct CertificateInfo {
 }
 
 /// Certificate storage manager
+#[derive(Clone)]
 pub struct CertificateStorage {
     cert_dir: PathBuf,
 }

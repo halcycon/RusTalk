@@ -43,6 +43,7 @@ impl Default for AcmeConfig {
 }
 
 /// ACME client for Let's Encrypt certificate management
+#[derive(Clone)]
 pub struct AcmeClient {
     config: AcmeConfig,
     storage: CertificateStorage,
