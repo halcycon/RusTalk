@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProviderWrapper } from './theme';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Calls from './pages/Calls';
@@ -7,21 +7,9 @@ import Statistics from './pages/Statistics';
 import Configuration from './pages/Configuration';
 import Certificates from './pages/Certificates';
 
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
-
 function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProviderWrapper>
       <Router>
         <Layout>
           <Routes>
@@ -33,7 +21,7 @@ function App() {
           </Routes>
         </Layout>
       </Router>
-    </ThemeProvider>
+    </ThemeProviderWrapper>
   );
 }
 

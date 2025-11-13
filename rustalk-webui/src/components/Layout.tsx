@@ -12,6 +12,7 @@ import {
   ListItemText,
   Toolbar,
   Typography,
+  Tooltip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -19,9 +20,12 @@ import {
   Phone as PhoneIcon,
   Settings as SettingsIcon,
   BarChart as BarChartIcon,
+  Brightness4 as DarkModeIcon,
+  Brightness7 as LightModeIcon,
   Security as SecurityIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useThemeMode } from '../theme';
 
 const drawerWidth = 240;
 
@@ -41,6 +45,7 @@ export default function Layout({ children }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { mode, toggleTheme } = useThemeMode();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -96,9 +101,18 @@ export default function Layout({ children }: LayoutProps) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             RusTalk Admin Console
           </Typography>
+          <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
+            <IconButton
+              color="inherit"
+              onClick={toggleTheme}
+              sx={{ ml: 1 }}
+            >
+              {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+            </IconButton>
+          </Tooltip>
         </Toolbar>
       </AppBar>
       <Box
