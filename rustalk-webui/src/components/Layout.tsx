@@ -20,6 +20,8 @@ import {
   Settings as SettingsIcon,
   BarChart as BarChartIcon,
   Security as SecurityIcon,
+  History as HistoryIcon,
+  AttachMoney as AttachMoneyIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -32,6 +34,8 @@ interface LayoutProps {
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
   { text: 'Calls', icon: <PhoneIcon />, path: '/calls' },
+  { text: 'Call Logs', icon: <HistoryIcon />, path: '/call-logs' },
+  { text: 'Rates', icon: <AttachMoneyIcon />, path: '/rates' },
   { text: 'Statistics', icon: <BarChartIcon />, path: '/stats' },
   { text: 'Certificates', icon: <SecurityIcon />, path: '/certificates' },
   { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },

@@ -9,6 +9,7 @@
 pub mod api;
 pub mod handlers;
 pub mod models;
+pub mod ratings;
 
 pub use api::CloudApi;
 
