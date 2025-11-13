@@ -1,6 +1,7 @@
 //! RusTalk CLI - Admin tool for managing RusTalk SIP servers
 
 mod console;
+mod cert;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -53,6 +54,55 @@ enum Commands {
         #[arg(short, long, default_value = "http://localhost:8080")]
         server: String,
     },
+    /// Certificate management commands
+    #[command(subcommand)]
+    Cert(CertCommands),
+}
+
+#[derive(Subcommand)]
+enum CertCommands {
+    /// Request a new Let's Encrypt certificate
+    Request {
+        /// Configuration file path
+        #[arg(short, long, default_value = "config.json")]
+        config: PathBuf,
+        /// Domain names to include in certificate
+        #[arg(short, long, required = true)]
+        domains: Vec<String>,
+        /// Email for Let's Encrypt account
+        #[arg(short, long)]
+        email: String,
+        /// Use staging environment (for testing)
+        #[arg(long)]
+        staging: bool,
+        /// Challenge type: http-01 or dns-01
+        #[arg(long, default_value = "http-01")]
+        challenge: String,
+    },
+    /// Renew an existing certificate
+    Renew {
+        /// Configuration file path
+        #[arg(short, long, default_value = "config.json")]
+        config: PathBuf,
+        /// Domain name (primary domain of certificate)
+        #[arg(short, long)]
+        domain: String,
+    },
+    /// Check certificate status and expiry
+    Status {
+        /// Configuration file path
+        #[arg(short, long, default_value = "config.json")]
+        config: PathBuf,
+        /// Domain name (optional, shows all if not specified)
+        #[arg(short, long)]
+        domain: Option<String>,
+    },
+    /// List all stored certificates
+    List {
+        /// Configuration file path
+        #[arg(short, long, default_value = "config.json")]
+        config: PathBuf,
+    },
 }
 
 #[tokio::main]
@@ -86,6 +136,9 @@ async fn main() -> Result<()> {
         Commands::ListCalls { server } => {
             println!("Listing calls from: {}", server);
             list_calls(&server).await?;
+        }
+        Commands::Cert(cert_cmd) => {
+            cert::handle_cert_command(cert_cmd).await?;
         }
     }
 

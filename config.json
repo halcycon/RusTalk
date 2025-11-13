@@ -33,5 +33,18 @@
     "mtls_cert": "/etc/rustalk/teams-cert.pem",
     "mtls_key": "/etc/rustalk/teams-key.pem",
     "trunk_fqdn": "sip.pstnhub.microsoft.com"
+  },
+  "acme": {
+    "enabled": true,
+    "email": "admin@example.com",
+    "domains": [
+      "sbc.example.com"
+    ],
+    "cert_dir": "/etc/rustalk/certs",
+    "account_dir": "/etc/rustalk/acme",
+    "use_staging": false,
+    "http_challenge_port": 80,
+    "challenge_type": "http-01",
+    "auto_renew_days": 30
   }
 }
