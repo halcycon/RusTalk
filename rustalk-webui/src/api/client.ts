@@ -10,7 +10,14 @@ import type {
   CertificateRequest,
   CertificateRenewal,
   CertificateListResponse,
-  CertificateOperationResponse 
+  CertificateOperationResponse,
+  CallLogDetail,
+  CallLogList,
+  RateCard,
+  RateListResponse,
+  RateImportRequest,
+  RateImportResponse,
+  CallLogExportRequest,
 } from '../types';
 
 const api = axios.create({
@@ -68,6 +75,49 @@ export const requestCertificate = async (request: CertificateRequest): Promise<C
 
 export const renewCertificate = async (renewal: CertificateRenewal): Promise<CertificateOperationResponse> => {
   const response = await api.post('/certificates/renew', renewal);
+  return response.data;
+};
+
+// Call logs API calls
+export const getCallLogs = async (params?: {
+  page?: number;
+  per_page?: number;
+  start_date?: number;
+  end_date?: number;
+  status?: string;
+}): Promise<CallLogList> => {
+  const response = await api.get('/call-logs', { params });
+  return response.data;
+};
+
+export const getCallLog = async (id: string): Promise<CallLogDetail> => {
+  const response = await api.get(`/call-logs/${id}`);
+  return response.data;
+};
+
+export const exportCallLogs = async (request: CallLogExportRequest): Promise<any> => {
+  const response = await api.post('/call-logs/export', request);
+  return response.data;
+};
+
+// Rates API calls
+export const getRates = async (): Promise<RateListResponse> => {
+  const response = await api.get('/rates');
+  return response.data;
+};
+
+export const importRates = async (request: RateImportRequest): Promise<RateImportResponse> => {
+  const response = await api.post('/rates/import', request);
+  return response.data;
+};
+
+export const saveRate = async (rate: RateCard): Promise<{ success: boolean; id: string; message: string }> => {
+  const response = await api.post('/rates', rate);
+  return response.data;
+};
+
+export const deleteRate = async (id: string): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete(`/rates/${id}`);
   return response.data;
 };
 

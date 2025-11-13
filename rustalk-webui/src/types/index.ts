@@ -106,3 +106,99 @@ export interface CertificateOperationResponse {
   cert_path?: string;
   key_path?: string;
 }
+
+// Call log types
+export interface CallLog {
+  id: string;
+  call_id: string;
+  from_user: string;
+  from_domain: string;
+  to_user: string;
+  to_domain: string;
+  start_time: number;
+  end_time?: number;
+  duration_seconds?: number;
+  status: string;
+  termination_reason?: string;
+  a_leg_codec?: string;
+  b_leg_codec?: string;
+  recording_path?: string;
+  cost?: number;
+}
+
+export interface ChargeItem {
+  description: string;
+  rate: number;
+  quantity: number;
+  unit: string;
+  amount: number;
+}
+
+export interface CallLogDetail {
+  id: string;
+  call_id: string;
+  from_user: string;
+  from_domain: string;
+  to_user: string;
+  to_domain: string;
+  start_time: number;
+  end_time?: number;
+  duration_seconds?: number;
+  status: string;
+  termination_reason?: string;
+  a_leg_codec?: string;
+  b_leg_codec?: string;
+  recording_path?: string;
+  cost?: number;
+  sip_call_id: string;
+  from_tag?: string;
+  to_tag?: string;
+  charge_breakdown?: ChargeItem[];
+  total_cost?: number;
+}
+
+export interface CallLogList {
+  logs: CallLog[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export interface RateCard {
+  id: string;
+  name: string;
+  description?: string;
+  prefix: string;
+  rate_per_minute: number;
+  connection_fee: number;
+  minimum_charge_seconds: number;
+  billing_increment_seconds: number;
+  currency: string;
+  effective_date: number;
+  end_date?: number;
+  active: boolean;
+}
+
+export interface RateListResponse {
+  rates: RateCard[];
+  total: number;
+}
+
+export interface RateImportRequest {
+  format: 'json' | 'csv';
+  data: string;
+  overwrite: boolean;
+}
+
+export interface RateImportResponse {
+  success: boolean;
+  imported_count: number;
+  errors: string[];
+}
+
+export interface CallLogExportRequest {
+  format: 'json' | 'csv' | 'pdf';
+  start_date?: number;
+  end_date?: number;
+  include_charges: boolean;
+}

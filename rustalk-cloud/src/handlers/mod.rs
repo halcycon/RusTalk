@@ -7,9 +7,9 @@ use axum::{
 };
 use serde_json::{json, Value};
 
-use crate::models::{CallInfo, ConfigUpdate, Stats};
 
 pub mod certificates;
+pub mod call_logs;
 
 /// Health check endpoint
 pub async fn health() -> (StatusCode, Json<Value>) {

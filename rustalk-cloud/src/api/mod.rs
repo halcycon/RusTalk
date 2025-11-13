@@ -55,6 +55,14 @@ impl CloudApi {
             .route("/api/v1/certificates/:domain", get(handlers::certificates::get_certificate_status))
             .route("/api/v1/certificates/request", post(handlers::certificates::request_certificate))
             .route("/api/v1/certificates/renew", post(handlers::certificates::renew_certificate))
+            // Call logs and ratings endpoints
+            .route("/api/v1/call-logs", get(handlers::call_logs::list_call_logs))
+            .route("/api/v1/call-logs/:id", get(handlers::call_logs::get_call_log))
+            .route("/api/v1/call-logs/export", post(handlers::call_logs::export_call_logs))
+            .route("/api/v1/rates", get(handlers::call_logs::list_rates))
+            .route("/api/v1/rates/import", post(handlers::call_logs::import_rates))
+            .route("/api/v1/rates", post(handlers::call_logs::save_rate))
+            .route("/api/v1/rates/:id", axum::routing::delete(handlers::call_logs::delete_rate))
             .with_state(acme_state);
 
         // If webui_path is provided, serve static files
