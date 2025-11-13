@@ -9,6 +9,8 @@ use serde_json::{json, Value};
 
 use crate::models::{CallInfo, ConfigUpdate, Stats};
 
+pub mod certificates;
+
 /// Health check endpoint
 pub async fn health() -> (StatusCode, Json<Value>) {
     (

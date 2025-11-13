@@ -19,6 +19,7 @@ import {
   Phone as PhoneIcon,
   Settings as SettingsIcon,
   BarChart as BarChartIcon,
+  Security as SecurityIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -32,6 +33,7 @@ const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
   { text: 'Calls', icon: <PhoneIcon />, path: '/calls' },
   { text: 'Statistics', icon: <BarChartIcon />, path: '/stats' },
+  { text: 'Certificates', icon: <SecurityIcon />, path: '/certificates' },
   { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },
 ];
 
