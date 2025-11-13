@@ -1,7 +1,17 @@
 // API client for RusTalk REST API
 
 import axios from 'axios';
-import type { CallInfo, Stats, Config, HealthResponse } from '../types';
+import type { 
+  CallInfo, 
+  Stats, 
+  Config, 
+  HealthResponse,
+  CertificateInfo,
+  CertificateRequest,
+  CertificateRenewal,
+  CertificateListResponse,
+  CertificateOperationResponse 
+} from '../types';
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -38,6 +48,27 @@ export const getConfig = async (): Promise<Config> => {
 
 export const updateConfig = async (config: Partial<Config>): Promise<void> => {
   await api.post('/config', config);
+};
+
+// Certificate management API calls
+export const listCertificates = async (): Promise<CertificateListResponse> => {
+  const response = await api.get('/certificates');
+  return response.data;
+};
+
+export const getCertificateStatus = async (domain: string): Promise<CertificateInfo> => {
+  const response = await api.get(`/certificates/${domain}`);
+  return response.data;
+};
+
+export const requestCertificate = async (request: CertificateRequest): Promise<CertificateOperationResponse> => {
+  const response = await api.post('/certificates/request', request);
+  return response.data;
+};
+
+export const renewCertificate = async (renewal: CertificateRenewal): Promise<CertificateOperationResponse> => {
+  const response = await api.post('/certificates/renew', renewal);
+  return response.data;
 };
 
 export default api;

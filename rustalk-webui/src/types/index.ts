@@ -49,10 +49,60 @@ export interface Config {
     max_connections: number;
     min_connections: number;
   };
+  acme?: {
+    enabled: boolean;
+    email: string;
+    domains: string[];
+    cert_dir: string;
+    account_dir: string;
+    use_staging: boolean;
+    http_challenge_port: number;
+    challenge_type: string;
+    auto_renew_days: number;
+  };
 }
 
 export interface HealthResponse {
   status: string;
   service: string;
   version: string;
+}
+
+// Certificate types
+export interface CertificateInfo {
+  domain: string;
+  domains: string[];
+  status: 'valid' | 'expiring_soon' | 'expired';
+  expires_at: string;
+  days_until_expiry: number;
+  cert_path?: string;
+  key_path?: string;
+  serial?: string;
+  needs_renewal: boolean;
+}
+
+export interface CertificateRequest {
+  domains: string[];
+  email: string;
+  challenge_type: 'http-01' | 'dns-01';
+  use_staging?: boolean;
+}
+
+export interface CertificateRenewal {
+  domain: string;
+}
+
+export interface CertificateListResponse {
+  certificates: CertificateInfo[];
+  total: number;
+}
+
+export interface CertificateOperationResponse {
+  success: boolean;
+  message: string;
+  domain?: string;
+  domains?: string[];
+  expires_at?: string;
+  cert_path?: string;
+  key_path?: string;
 }

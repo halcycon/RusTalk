@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Calls from './pages/Calls';
 import Statistics from './pages/Statistics';
 import Configuration from './pages/Configuration';
+import Certificates from './pages/Certificates';
 
 const theme = createTheme({
   palette: {
@@ -28,6 +29,7 @@ function App() {
             <Route path="/calls" element={<Calls />} />
             <Route path="/stats" element={<Statistics />} />
             <Route path="/config" element={<Configuration />} />
+            <Route path="/certificates" element={<Certificates />} />
           </Routes>
         </Layout>
       </Router>
