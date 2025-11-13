@@ -22,6 +22,7 @@ import {
   BarChart as BarChartIcon,
   Brightness4 as DarkModeIcon,
   Brightness7 as LightModeIcon,
+  Security as SecurityIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useThemeMode } from '../theme';
@@ -36,6 +37,7 @@ const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
   { text: 'Calls', icon: <PhoneIcon />, path: '/calls' },
   { text: 'Statistics', icon: <BarChartIcon />, path: '/stats' },
+  { text: 'Certificates', icon: <SecurityIcon />, path: '/certificates' },
   { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },
 ];
 
