@@ -10,6 +10,7 @@ use serde_json::{json, Value};
 
 pub mod certificates;
 pub mod call_logs;
+pub mod codecs;
 
 /// Health check endpoint
 pub async fn health() -> (StatusCode, Json<Value>) {

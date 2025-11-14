@@ -2,7 +2,7 @@
 
 use crate::handlers::{self, certificates::AcmeState};
 use axum::{
-    routing::{get, post},
+    routing::{get, post, put},
     Router,
 };
 use std::net::SocketAddr;
@@ -12,12 +12,14 @@ use tower_http::services::ServeDir;
 use tracing::info;
 
 use rustalk_core::acme::AcmeClient;
+use rustalk_core::media::CodecConfig;
 
 /// Cloud API server
 pub struct CloudApi {
     addr: SocketAddr,
     webui_path: Option<String>,
     acme_client: Option<AcmeClient>,
+    codec_config: CodecConfig,
 }
 
 impl CloudApi {
@@ -26,6 +28,7 @@ impl CloudApi {
             addr,
             webui_path: None,
             acme_client: None,
+            codec_config: CodecConfig::default(),
         }
     }
 
@@ -41,8 +44,14 @@ impl CloudApi {
         self
     }
 
+    /// Set the codec configuration
+    pub fn with_codec_config(mut self, config: CodecConfig) -> Self {
+        self.codec_config = config;
+        self
+    }
+
     /// Build the API router
-    fn router(webui_path: Option<String>, acme_state: AcmeState) -> Router {
+    fn router(webui_path: Option<String>, acme_state: AcmeState, codec_state: Arc<RwLock<CodecConfig>>) -> Router {
         let mut app = Router::new()
             .route("/health", get(handlers::health))
             .route("/api/v1/calls", get(handlers::list_calls))
@@ -63,7 +72,13 @@ impl CloudApi {
             .route("/api/v1/rates/import", post(handlers::call_logs::import_rates))
             .route("/api/v1/rates", post(handlers::call_logs::save_rate))
             .route("/api/v1/rates/:id", axum::routing::delete(handlers::call_logs::delete_rate))
-            .with_state(acme_state);
+            .with_state(acme_state)
+            // Codec management endpoints (using separate state)
+            .route("/api/v1/codecs", get(handlers::codecs::list_codecs).with_state(codec_state.clone()))
+            .route("/api/v1/codecs/update", put(handlers::codecs::update_codec).with_state(codec_state.clone()))
+            .route("/api/v1/codecs/add", post(handlers::codecs::add_codec).with_state(codec_state.clone()))
+            .route("/api/v1/codecs/remove", post(handlers::codecs::remove_codec).with_state(codec_state.clone()))
+            .route("/api/v1/codecs/reorder", post(handlers::codecs::reorder_codecs).with_state(codec_state));
 
         // If webui_path is provided, serve static files
         if let Some(path) = webui_path {
@@ -77,7 +92,8 @@ impl CloudApi {
     /// Start the API server
     pub async fn start(&self) -> anyhow::Result<()> {
         let acme_state = Arc::new(RwLock::new(self.acme_client.clone()));
-        let app = Self::router(self.webui_path.clone(), acme_state);
+        let codec_state = Arc::new(RwLock::new(self.codec_config.clone()));
+        let app = Self::router(self.webui_path.clone(), acme_state, codec_state);
 
         info!("Starting Cloud API server on {}", self.addr);
 

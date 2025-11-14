@@ -18,6 +18,11 @@ import type {
   RateImportRequest,
   RateImportResponse,
   CallLogExportRequest,
+  CodecListResponse,
+  CodecUpdateRequest,
+  CodecAddRequest,
+  CodecRemoveRequest,
+  CodecReorderRequest,
 } from '../types';
 
 const api = axios.create({
@@ -118,6 +123,32 @@ export const saveRate = async (rate: RateCard): Promise<{ success: boolean; id: 
 
 export const deleteRate = async (id: string): Promise<{ success: boolean; message: string }> => {
   const response = await api.delete(`/rates/${id}`);
+  return response.data;
+};
+
+// Codec management API calls
+export const getCodecs = async (): Promise<CodecListResponse> => {
+  const response = await api.get('/codecs');
+  return response.data;
+};
+
+export const updateCodec = async (request: CodecUpdateRequest): Promise<{ success: boolean; message: string }> => {
+  const response = await api.put('/codecs/update', request);
+  return response.data;
+};
+
+export const addCodec = async (request: CodecAddRequest): Promise<{ success: boolean; message: string }> => {
+  const response = await api.post('/codecs/add', request);
+  return response.data;
+};
+
+export const removeCodec = async (request: CodecRemoveRequest): Promise<{ success: boolean; message: string }> => {
+  const response = await api.post('/codecs/remove', request);
+  return response.data;
+};
+
+export const reorderCodecs = async (request: CodecReorderRequest): Promise<{ success: boolean; message: string; codecs: any[] }> => {
+  const response = await api.post('/codecs/reorder', request);
   return response.data;
 };
 
