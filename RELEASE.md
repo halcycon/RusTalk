@@ -22,7 +22,63 @@ The workflow automatically determines the release type based on the tag:
 
 ## Creating a Release
 
-### 1. Prepare the Release
+### Method 1: Manual Trigger via GitHub UI (Recommended)
+
+This method allows you to create a release without needing to checkout the repository locally.
+
+#### 1. Prepare the Release
+
+Ensure the version is updated in a PR:
+
+- Update version in `Cargo.toml`
+- Update `Cargo.lock` with `cargo update -p rustalk-core -p rustalk-edge -p rustalk-cloud -p rustalk-cli`
+- All tests pass: `cargo test --workspace`
+- Code is properly formatted: `cargo fmt --all`
+- Clippy checks are addressed: `cargo clippy --workspace`
+
+#### 2. Merge the PR
+
+Merge the version bump PR to the main branch.
+
+#### 3. Trigger Release Workflow
+
+1. Go to the [Actions tab](https://github.com/halcycon/RusTalk/actions)
+2. Select the "Release" workflow from the left sidebar
+3. Click "Run workflow" button
+4. Enter the version number (e.g., `0.2.0` - without the 'v' prefix)
+5. Optionally check "Mark as pre-release" for release candidates, betas, or alphas
+6. Click "Run workflow"
+
+The workflow will automatically:
+- Create and push the git tag (e.g., `v0.2.0`)
+- Run tests on all platforms
+- Build release binaries
+- Create GitHub release with all artifacts
+
+#### 4. Monitor the Build
+
+1. The workflow run will appear in the [Actions tab](https://github.com/halcycon/RusTalk/actions)
+2. Watch the progress through each job:
+   - Create Release Tag (for manual triggers)
+   - Run tests
+   - Build for Linux, macOS (x86_64 and ARM64), and Windows
+   - Create GitHub Release
+
+The entire process typically takes 15-30 minutes.
+
+#### 5. Verify the Release
+
+1. Go to the [Releases page](https://github.com/halcycon/RusTalk/releases)
+2. Check that the new release appears with all platform archives
+3. Download and test one or more archives to verify they work
+
+---
+
+### Method 2: Manual Tag Push (Traditional)
+
+This method requires local repository access.
+
+#### 1. Prepare the Release
 
 Before creating a release, ensure:
 
@@ -30,9 +86,8 @@ Before creating a release, ensure:
 - Code is properly formatted: `cargo fmt --all`
 - Clippy checks are addressed: `cargo clippy --workspace`
 - Documentation is up to date
-- CHANGELOG is updated (if you maintain one)
 
-### 2. Update Version Numbers
+#### 2. Update Version Numbers
 
 Update the version in `Cargo.toml`:
 
@@ -47,7 +102,7 @@ Then update the lock file:
 cargo update -p rustalk-core -p rustalk-edge -p rustalk-cloud -p rustalk-cli
 ```
 
-### 3. Commit Version Update
+#### 3. Commit Version Update
 
 ```bash
 git add Cargo.toml Cargo.lock
@@ -55,7 +110,7 @@ git commit -m "Bump version to 0.2.0"
 git push origin main
 ```
 
-### 4. Create and Push the Tag
+#### 4. Create and Push the Tag
 
 ```bash
 # Create an annotated tag
@@ -65,23 +120,11 @@ git tag -a v0.2.0 -m "Release version 0.2.0"
 git push origin v0.2.0
 ```
 
-### 5. Monitor the Build
+#### 5. Monitor and Verify
 
-1. Go to the [Actions tab](https://github.com/halcycon/RusTalk/actions) on GitHub
-2. Watch the "Release" workflow run
-3. The workflow will:
-   - Run tests on all platforms
-   - Build release binaries for each platform
-   - Create release archives
-   - Publish a GitHub release with all artifacts
+Follow steps 4-5 from Method 1 above to monitor the build and verify the release.
 
-The entire process typically takes 15-30 minutes.
-
-### 6. Verify the Release
-
-1. Go to the [Releases page](https://github.com/halcycon/RusTalk/releases)
-2. Check that the new release appears with all platform archives
-3. Download and test one or more archives to verify they work
+---
 
 ## Manual Release (if needed)
 
