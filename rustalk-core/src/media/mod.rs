@@ -1,11 +1,12 @@
 //! Media handling - SRTP pass-through and SDP manipulation
 
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
 
+pub mod codec;
 pub mod sdp;
 pub mod srtp;
 
+pub use codec::{Codec, CodecConfig};
 pub use sdp::SdpSession;
 pub use srtp::SrtpConfig;
 

@@ -6,6 +6,8 @@ use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use tokio::fs;
 
+use crate::media::CodecConfig;
+
 /// Main configuration structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -15,6 +17,7 @@ pub struct Config {
     pub database: Option<DatabaseConfig>,
     pub teams: Option<TeamsConfig>,
     pub acme: Option<AcmeConfig>,
+    pub codecs: Option<CodecConfig>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -171,6 +174,7 @@ impl Default for Config {
             database: None,
             teams: None,
             acme: None,
+            codecs: Some(CodecConfig::default()),
         }
     }
 }
