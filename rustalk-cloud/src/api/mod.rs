@@ -136,7 +136,8 @@ impl CloudApi {
             .route("/api/v1/routes", post(handlers::routes::create_route).with_state(routes_state.clone()))
             .route("/api/v1/routes/:id", put(handlers::routes::update_route).with_state(routes_state.clone()))
             .route("/api/v1/routes/:id", delete(handlers::routes::delete_route).with_state(routes_state.clone()))
-            .route("/api/v1/routes/reorder", post(handlers::routes::reorder_routes).with_state(routes_state))
+            .route("/api/v1/routes/reorder", post(handlers::routes::reorder_routes).with_state(routes_state.clone()))
+            .route("/api/v1/routes/test", post(handlers::routes::test_route).with_state(routes_state))
             // SIP Profile management endpoints
             .route("/api/v1/sip-profiles", get(handlers::sip_profiles::list_sip_profiles).with_state(sip_profiles_state.clone()))
             .route("/api/v1/sip-profiles/:id", get(handlers::sip_profiles::get_sip_profile).with_state(sip_profiles_state.clone()))

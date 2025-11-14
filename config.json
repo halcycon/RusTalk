@@ -140,5 +140,108 @@
         "is_standard": true
       }
     ]
+  },
+  "routing": {
+    "routes": [
+      {
+        "id": "route-business-hours",
+        "name": "Business Hours - Internal Extensions",
+        "description": "Route internal calls during business hours (Mon-Fri, 9am-5pm)",
+        "pattern": "^[2-5]\\d{3}$",
+        "destination": {
+          "type": "Extension",
+          "value": "${destination}"
+        },
+        "enabled": true,
+        "priority": 10,
+        "conditions": [
+          {
+            "type": "Time",
+            "start_time": "09:00",
+            "end_time": "17:00"
+          },
+          {
+            "type": "DayOfWeek",
+            "days": [1, 2, 3, 4, 5]
+          }
+        ],
+        "action": "accept",
+        "continue_on_match": false
+      },
+      {
+        "id": "route-after-hours",
+        "name": "After Hours - Voicemail",
+        "description": "Send calls to voicemail outside business hours",
+        "pattern": "^[2-5]\\d{3}$",
+        "destination": {
+          "type": "Voicemail",
+          "value": "${destination}"
+        },
+        "enabled": true,
+        "priority": 20,
+        "conditions": [],
+        "action": "accept",
+        "continue_on_match": false
+      },
+      {
+        "id": "route-emergency",
+        "name": "Emergency Numbers",
+        "description": "Route emergency numbers to appropriate trunk",
+        "pattern": "^(911|999|112)$",
+        "destination": {
+          "type": "Trunk",
+          "value": "emergency-trunk"
+        },
+        "enabled": true,
+        "priority": 5,
+        "conditions": [],
+        "action": "accept",
+        "continue_on_match": false
+      },
+      {
+        "id": "route-international-block",
+        "name": "Block International Calls",
+        "description": "Block international calls (starting with +, except US/Canada)",
+        "pattern": "^\\+(?!1).*$",
+        "destination": {
+          "type": "Hangup"
+        },
+        "enabled": true,
+        "priority": 15,
+        "conditions": [],
+        "action": "reject",
+        "continue_on_match": false
+      },
+      {
+        "id": "route-us-canada",
+        "name": "US/Canada Numbers",
+        "description": "Route US and Canada calls to PSTN trunk",
+        "pattern": "^\\+1\\d{10}$",
+        "destination": {
+          "type": "Trunk",
+          "value": "pstn-trunk"
+        },
+        "enabled": true,
+        "priority": 25,
+        "conditions": [],
+        "action": "accept",
+        "continue_on_match": false
+      },
+      {
+        "id": "route-support-team",
+        "name": "Support Ring Group",
+        "description": "Route extension 8000 to support ring group",
+        "pattern": "^8000$",
+        "destination": {
+          "type": "RingGroup",
+          "value": "support-team"
+        },
+        "enabled": true,
+        "priority": 8,
+        "conditions": [],
+        "action": "accept",
+        "continue_on_match": false
+      }
+    ]
   }
 }

@@ -311,19 +311,77 @@ export interface RingGroupListResponse {
 }
 
 // Route types
+export type RouteDestinationType = 'Extension' | 'Trunk' | 'RingGroup' | 'Voicemail' | 'Hangup' | 'Custom';
+export type RouteActionType = 'accept' | 'reject' | 'continue';
+export type RouteConditionType = 'Time' | 'DayOfWeek' | 'DateRange' | 'CallerId' | 'Destination';
+
+export interface RouteDestination {
+  type: RouteDestinationType;
+  value?: string;
+}
+
+export interface TimeCondition {
+  type: 'Time';
+  start_time: string;
+  end_time: string;
+}
+
+export interface DayOfWeekCondition {
+  type: 'DayOfWeek';
+  days: number[];
+}
+
+export interface DateRangeCondition {
+  type: 'DateRange';
+  start_date: string;
+  end_date: string;
+}
+
+export interface CallerIdCondition {
+  type: 'CallerId';
+  pattern: string;
+  negate: boolean;
+}
+
+export interface DestinationCondition {
+  type: 'Destination';
+  pattern: string;
+  negate: boolean;
+}
+
+export type RouteCondition = TimeCondition | DayOfWeekCondition | DateRangeCondition | CallerIdCondition | DestinationCondition;
+
 export interface Route {
   id: string;
   name: string;
   description?: string;
   pattern: string;
-  destination: string;
+  destination: RouteDestination | string; // Support old format for backward compatibility
   enabled: boolean;
   priority: number;
+  conditions?: RouteCondition[];
+  action: RouteActionType;
+  continue_on_match: boolean;
 }
 
 export interface RouteListResponse {
   routes: Route[];
   total: number;
+}
+
+export interface RouteTestRequest {
+  caller_id: string;
+  destination: string;
+}
+
+export interface RouteTestResponse {
+  success: boolean;
+  matched: boolean;
+  route_id?: string;
+  route_name?: string;
+  destination?: RouteDestination;
+  action?: RouteActionType;
+  message?: string;
 }
 
 // SIP Profile types
