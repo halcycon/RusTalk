@@ -16,6 +16,7 @@ pub mod config;
 pub mod media;
 pub mod acme;
 pub mod routing;
+pub mod voicemail;
 
 pub use config::Config;
 
@@ -29,4 +30,5 @@ pub mod prelude {
     pub use crate::config::Config;
     pub use crate::acme::{AcmeClient, AcmeConfig, CertificateStatus};
     pub use crate::routing::{RouteEvaluator, CallContext, RouteMatch, RoutingConfig};
+    pub use crate::voicemail::{VoicemailManager, VoicemailBox, VoicemailMessage, MwiStatus};
 }

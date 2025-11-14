@@ -18,6 +18,7 @@ pub mod trunks;
 pub mod ring_groups;
 pub mod routes;
 pub mod sip_profiles;
+pub mod voicemail;
 
 /// Health check endpoint
 pub async fn health() -> (StatusCode, Json<Value>) {
