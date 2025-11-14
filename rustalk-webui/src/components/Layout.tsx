@@ -13,6 +13,9 @@ import {
   Toolbar,
   Typography,
   Tooltip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -31,6 +34,8 @@ import {
   Groups as GroupIcon,
   Route as RouteIcon,
   Dialpad as DialpadIcon,
+  ExpandMore as ExpandMoreIcon,
+  Cloud as CloudIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useThemeMode } from '../theme';
@@ -41,31 +46,118 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-const menuItems = [
+interface MenuItem {
+  text: string;
+  icon: React.ReactElement;
+  path: string;
+}
+
+interface MenuGroup {
+  title: string;
+  icon: React.ReactElement;
+  items: MenuItem[];
+}
+
+// Standalone menu items (not in groups)
+const standaloneMenuItems: MenuItem[] = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-  { text: 'Calls', icon: <PhoneIcon />, path: '/calls' },
-  { text: 'Call Logs', icon: <HistoryIcon />, path: '/call-logs' },
-  { text: 'Rates', icon: <AttachMoneyIcon />, path: '/rates' },
-  { text: 'Statistics', icon: <BarChartIcon />, path: '/stats' },
-  { text: 'DIDs', icon: <DialpadIcon />, path: '/dids' },
-  { text: 'Extensions', icon: <ContactsIcon />, path: '/extensions' },
-  { text: 'Trunks', icon: <TrunkIcon />, path: '/trunks' },
-  { text: 'Ring Groups', icon: <GroupIcon />, path: '/ring-groups' },
-  { text: 'Routes', icon: <RouteIcon />, path: '/routes' },
-  { text: 'SIP Profiles', icon: <SettingsIcon />, path: '/sip-profiles' },
-  { text: 'Codecs', icon: <CodecIcon />, path: '/codecs' },
-  { text: 'Certificates', icon: <SecurityIcon />, path: '/certificates' },
-  { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },
+];
+
+// Grouped menu items
+const menuGroups: MenuGroup[] = [
+  {
+    title: 'Call Management',
+    icon: <PhoneIcon />,
+    items: [
+      { text: 'Active Calls', icon: <PhoneIcon />, path: '/calls' },
+      { text: 'Call Logs', icon: <HistoryIcon />, path: '/call-logs' },
+    ],
+  },
+  {
+    title: 'PBX Features',
+    icon: <ContactsIcon />,
+    items: [
+      { text: 'Extensions', icon: <ContactsIcon />, path: '/extensions' },
+      { text: 'DIDs', icon: <DialpadIcon />, path: '/dids' },
+      { text: 'Ring Groups', icon: <GroupIcon />, path: '/ring-groups' },
+      { text: 'Trunks', icon: <TrunkIcon />, path: '/trunks' },
+    ],
+  },
+  {
+    title: 'Routing',
+    icon: <RouteIcon />,
+    items: [
+      { text: 'Routes', icon: <RouteIcon />, path: '/routes' },
+      { text: 'SIP Profiles', icon: <SettingsIcon />, path: '/sip-profiles' },
+    ],
+  },
+  {
+    title: 'Teams/SBC',
+    icon: <CloudIcon />,
+    items: [
+      { text: 'Teams Edge', icon: <CloudIcon />, path: '/teams-edge' },
+    ],
+  },
+  {
+    title: 'Media',
+    icon: <CodecIcon />,
+    items: [
+      { text: 'Codecs', icon: <CodecIcon />, path: '/codecs' },
+    ],
+  },
+  {
+    title: 'Billing',
+    icon: <AttachMoneyIcon />,
+    items: [
+      { text: 'Rates', icon: <AttachMoneyIcon />, path: '/rates' },
+    ],
+  },
+  {
+    title: 'Security',
+    icon: <SecurityIcon />,
+    items: [
+      { text: 'Certificates', icon: <SecurityIcon />, path: '/certificates' },
+    ],
+  },
+  {
+    title: 'System',
+    icon: <SettingsIcon />,
+    items: [
+      { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },
+      { text: 'Statistics', icon: <BarChartIcon />, path: '/stats' },
+    ],
+  },
 ];
 
 export default function Layout({ children }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [expandedGroups, setExpandedGroups] = React.useState<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, toggleTheme } = useThemeMode();
 
+  // Auto-expand the group containing the current path
+  React.useEffect(() => {
+    const currentGroup = menuGroups.find(group =>
+      group.items.some(item => item.path === location.pathname)
+    );
+    if (currentGroup) {
+      setExpandedGroups(prev => 
+        prev.includes(currentGroup.title) ? prev : [...prev, currentGroup.title]
+      );
+    }
+  }, [location.pathname]);
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleAccordionChange = (groupTitle: string) => {
+    setExpandedGroups(prev =>
+      prev.includes(groupTitle)
+        ? prev.filter(title => title !== groupTitle)
+        : [...prev, groupTitle]
+    );
   };
 
   const drawer = (
@@ -82,8 +174,10 @@ export default function Layout({ children }: LayoutProps) {
           </Typography>
         </Box>
       </Toolbar>
+      
+      {/* Standalone menu items */}
       <List>
-        {menuItems.map((item) => (
+        {standaloneMenuItems.map((item) => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton
               selected={location.pathname === item.path}
@@ -95,6 +189,53 @@ export default function Layout({ children }: LayoutProps) {
           </ListItem>
         ))}
       </List>
+
+      {/* Grouped menu items with accordions */}
+      <Box sx={{ px: 1 }}>
+        {menuGroups.map((group) => (
+          <Accordion
+            key={group.title}
+            expanded={expandedGroups.includes(group.title)}
+            onChange={() => handleAccordionChange(group.title)}
+            disableGutters
+            elevation={0}
+            sx={{
+              '&:before': { display: 'none' },
+              '&.Mui-expanded': { margin: 0 },
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              sx={{
+                minHeight: 48,
+                '&.Mui-expanded': { minHeight: 48 },
+                px: 2,
+              }}
+            >
+              <Box display="flex" alignItems="center" gap={1}>
+                {group.icon}
+                <Typography>{group.title}</Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 0 }}>
+              <List disablePadding>
+                {group.items.map((item) => (
+                  <ListItem key={item.text} disablePadding>
+                    <ListItemButton
+                      selected={location.pathname === item.path}
+                      onClick={() => navigate(item.path)}
+                      sx={{ pl: 4 }}
+                    >
+                      <ListItemIcon>{item.icon}</ListItemIcon>
+                      <ListItemText primary={item.text} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </AccordionDetails>
+          </Accordion>
+        ))}
+      </Box>
     </div>
   );
 

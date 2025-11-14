@@ -1,5 +1,5 @@
 // Mock data for development and testing
-import type { CallInfo, Stats, HealthResponse } from './types';
+import type { CallInfo, Stats, HealthResponse, TeamsConfig, TeamsStatusResponse } from './types';
 
 export const mockStats: Stats = {
   active_calls: 42,
@@ -41,3 +41,44 @@ export const mockCalls: CallInfo[] = [
     duration: 300,
   },
 ];
+
+export const mockTeamsConfig: TeamsConfig = {
+  sbc_fqdn: 'sbc.example.com',
+  tenant_domain: 'contoso.onmicrosoft.com',
+  mtls_cert_path: '/etc/rustalk/teams-cert.pem',
+  mtls_key_path: '/etc/rustalk/teams-key.pem',
+  sip_proxies: [
+    'sip.pstnhub.microsoft.com',
+    'sip2.pstnhub.microsoft.com',
+    'sip3.pstnhub.microsoft.com',
+  ],
+  options_ping_enabled: true,
+  options_ping_interval: 60,
+};
+
+export const mockTeamsStatus: TeamsStatusResponse = {
+  enabled: true,
+  config: mockTeamsConfig,
+  health_status: [
+    {
+      proxy: 'sip.pstnhub.microsoft.com',
+      status: 'healthy',
+      last_check: Date.now() - 30000,
+      response_time_ms: 45,
+    },
+    {
+      proxy: 'sip2.pstnhub.microsoft.com',
+      status: 'healthy',
+      last_check: Date.now() - 30000,
+      response_time_ms: 52,
+    },
+    {
+      proxy: 'sip3.pstnhub.microsoft.com',
+      status: 'degraded',
+      last_check: Date.now() - 30000,
+      response_time_ms: 250,
+    },
+  ],
+  total_calls: 1523,
+  active_calls: 12,
+};

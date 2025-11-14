@@ -15,6 +15,7 @@ import Trunks from './pages/Trunks';
 import RingGroups from './pages/RingGroups';
 import RoutesPage from './pages/Routes';
 import SipProfiles from './pages/SipProfiles';
+import TeamsEdge from './pages/TeamsEdge';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
             <Route path="/ring-groups" element={<RingGroups />} />
             <Route path="/routes" element={<RoutesPage />} />
             <Route path="/sip-profiles" element={<SipProfiles />} />
+            <Route path="/teams-edge" element={<TeamsEdge />} />
           </Routes>
         </Layout>
       </Router>

@@ -406,3 +406,30 @@ export interface ReorderRequest {
   from_index: number;
   to_index: number;
 }
+
+// Teams/Edge SBC configuration types
+export interface TeamsConfig {
+  sbc_fqdn: string;
+  tenant_domain: string;
+  mtls_cert_path: string;
+  mtls_key_path: string;
+  sip_proxies: string[];
+  options_ping_enabled: boolean;
+  options_ping_interval: number;
+}
+
+export interface TeamsHealthStatus {
+  proxy: string;
+  status: 'healthy' | 'degraded' | 'down';
+  last_check: number;
+  response_time_ms?: number;
+  error?: string;
+}
+
+export interface TeamsStatusResponse {
+  enabled: boolean;
+  config?: TeamsConfig;
+  health_status: TeamsHealthStatus[];
+  total_calls: number;
+  active_calls: number;
+}
