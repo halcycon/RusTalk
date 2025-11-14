@@ -343,4 +343,25 @@ export const reorderSipProfiles = async (request: import('../types').ReorderRequ
   return response.data;
 };
 
+// Teams/Edge SBC management API calls
+export const getTeamsStatus = async (): Promise<import('../types').TeamsStatusResponse> => {
+  const response = await api.get('/teams/status');
+  return response.data;
+};
+
+export const getTeamsConfig = async (): Promise<import('../types').TeamsConfig> => {
+  const response = await api.get('/teams/config');
+  return response.data;
+};
+
+export const updateTeamsConfig = async (config: import('../types').TeamsConfig): Promise<{ success: boolean; message: string }> => {
+  const response = await api.put('/teams/config', config);
+  return response.data;
+};
+
+export const testTeamsConnection = async (): Promise<{ success: boolean; message: string; health_status: import('../types').TeamsHealthStatus[] }> => {
+  const response = await api.post('/teams/test');
+  return response.data;
+};
+
 export default api;
