@@ -131,3 +131,86 @@ pub struct CallLogList {
     pub page: usize,
     pub per_page: usize,
 }
+
+/// DID (Direct Inward Dialing) configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Did {
+    pub id: String,
+    pub number: String,
+    pub description: Option<String>,
+    pub destination: String, // Extension, ring group, or other destination
+    pub enabled: bool,
+    pub priority: u32,
+}
+
+/// Endpoint/Extension configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Extension {
+    pub id: String,
+    pub extension: String,
+    pub display_name: String,
+    pub password: String,
+    pub enabled: bool,
+    pub voicemail_enabled: bool,
+    pub priority: u32,
+}
+
+/// SIP Trunk configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Trunk {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub host: String,
+    pub port: u16,
+    pub username: Option<String>,
+    pub password: Option<String>,
+    pub enabled: bool,
+    pub priority: u32,
+}
+
+/// Ring Group configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RingGroup {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub extensions: Vec<String>, // List of extension IDs
+    pub strategy: RingStrategy,
+    pub timeout_seconds: u32,
+    pub enabled: bool,
+    pub priority: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum RingStrategy {
+    Simultaneous, // Ring all extensions at once
+    Sequential,   // Ring extensions in order
+    RoundRobin,   // Distribute calls evenly
+}
+
+/// Route/Dialplan configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Route {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub pattern: String, // Regex or pattern to match
+    pub destination: String, // Where to route the call
+    pub enabled: bool,
+    pub priority: u32,
+}
+
+/// SIP Profile configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SipProfile {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub bind_address: String,
+    pub bind_port: u16,
+    pub domain: String,
+    pub enabled: bool,
+    pub priority: u32,
+}

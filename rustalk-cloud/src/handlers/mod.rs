@@ -11,6 +11,12 @@ use serde_json::{json, Value};
 pub mod certificates;
 pub mod call_logs;
 pub mod codecs;
+pub mod dids;
+pub mod extensions;
+pub mod trunks;
+pub mod ring_groups;
+pub mod routes;
+pub mod sip_profiles;
 
 /// Health check endpoint
 pub async fn health() -> (StatusCode, Json<Value>) {

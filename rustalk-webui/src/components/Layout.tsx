@@ -26,6 +26,11 @@ import {
   History as HistoryIcon,
   AttachMoney as AttachMoneyIcon,
   GraphicEq as CodecIcon,
+  Contacts as ContactsIcon,
+  PhoneForwarded as TrunkIcon,
+  Groups as GroupIcon,
+  Route as RouteIcon,
+  Dialpad as DialpadIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useThemeMode } from '../theme';
@@ -42,6 +47,12 @@ const menuItems = [
   { text: 'Call Logs', icon: <HistoryIcon />, path: '/call-logs' },
   { text: 'Rates', icon: <AttachMoneyIcon />, path: '/rates' },
   { text: 'Statistics', icon: <BarChartIcon />, path: '/stats' },
+  { text: 'DIDs', icon: <DialpadIcon />, path: '/dids' },
+  { text: 'Extensions', icon: <ContactsIcon />, path: '/extensions' },
+  { text: 'Trunks', icon: <TrunkIcon />, path: '/trunks' },
+  { text: 'Ring Groups', icon: <GroupIcon />, path: '/ring-groups' },
+  { text: 'Routes', icon: <RouteIcon />, path: '/routes' },
+  { text: 'SIP Profiles', icon: <SettingsIcon />, path: '/sip-profiles' },
   { text: 'Codecs', icon: <CodecIcon />, path: '/codecs' },
   { text: 'Certificates', icon: <SecurityIcon />, path: '/certificates' },
   { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },

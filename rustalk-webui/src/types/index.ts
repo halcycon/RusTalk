@@ -241,3 +241,110 @@ export interface CodecReorderRequest {
   from_index: number;
   to_index: number;
 }
+
+// DID types
+export interface Did {
+  id: string;
+  number: string;
+  description?: string;
+  destination: string;
+  enabled: boolean;
+  priority: number;
+}
+
+export interface DidListResponse {
+  dids: Did[];
+  total: number;
+}
+
+// Extension types
+export interface Extension {
+  id: string;
+  extension: string;
+  display_name: string;
+  password: string;
+  enabled: boolean;
+  voicemail_enabled: boolean;
+  priority: number;
+}
+
+export interface ExtensionListResponse {
+  extensions: Extension[];
+  total: number;
+}
+
+// Trunk types
+export interface Trunk {
+  id: string;
+  name: string;
+  description?: string;
+  host: string;
+  port: number;
+  username?: string;
+  password?: string;
+  enabled: boolean;
+  priority: number;
+}
+
+export interface TrunkListResponse {
+  trunks: Trunk[];
+  total: number;
+}
+
+// Ring Group types
+export type RingStrategy = 'simultaneous' | 'sequential' | 'roundrobin';
+
+export interface RingGroup {
+  id: string;
+  name: string;
+  description?: string;
+  extensions: string[];
+  strategy: RingStrategy;
+  timeout_seconds: number;
+  enabled: boolean;
+  priority: number;
+}
+
+export interface RingGroupListResponse {
+  ring_groups: RingGroup[];
+  total: number;
+}
+
+// Route types
+export interface Route {
+  id: string;
+  name: string;
+  description?: string;
+  pattern: string;
+  destination: string;
+  enabled: boolean;
+  priority: number;
+}
+
+export interface RouteListResponse {
+  routes: Route[];
+  total: number;
+}
+
+// SIP Profile types
+export interface SipProfile {
+  id: string;
+  name: string;
+  description?: string;
+  bind_address: string;
+  bind_port: number;
+  domain: string;
+  enabled: boolean;
+  priority: number;
+}
+
+export interface SipProfileListResponse {
+  sip_profiles: SipProfile[];
+  total: number;
+}
+
+// Common reorder request
+export interface ReorderRequest {
+  from_index: number;
+  to_index: number;
+}
