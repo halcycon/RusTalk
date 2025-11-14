@@ -307,6 +307,11 @@ export const reorderRoutes = async (request: import('../types').ReorderRequest):
   return response.data;
 };
 
+export const testRoute = async (request: import('../types').RouteTestRequest): Promise<import('../types').RouteTestResponse> => {
+  const response = await api.post('/routes/test', request);
+  return response.data;
+};
+
 // SIP Profile management API calls
 export const getSipProfiles = async (): Promise<import('../types').SipProfileListResponse> => {
   const response = await api.get('/sip-profiles');

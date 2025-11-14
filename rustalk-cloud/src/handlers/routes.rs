@@ -166,3 +166,56 @@ pub async fn reorder_routes(
         })),
     )
 }
+
+/// Test/validate a route against sample call data
+pub async fn test_route(
+    State(state): State<RoutesState>,
+    Json(payload): Json<Value>,
+) -> (StatusCode, Json<Value>) {
+    use rustalk_core::routing::{RouteEvaluator, CallContext, RoutingConfig, RouteRule};
+    
+    let routes = state.read().await;
+    
+    // Extract test parameters
+    let caller_id = payload["caller_id"].as_str().unwrap_or("unknown");
+    let destination = payload["destination"].as_str().unwrap_or("unknown");
+    
+    // Convert API routes to routing engine format
+    let mut routing_config = RoutingConfig::new();
+    for route in routes.iter() {
+        // Convert the route to RouteRule format
+        let route_json = serde_json::to_value(route).unwrap_or_default();
+        if let Ok(route_rule) = serde_json::from_value::<RouteRule>(route_json) {
+            routing_config.add_route(route_rule);
+        }
+    }
+    
+    // Create evaluator and test
+    let evaluator = RouteEvaluator::new(routing_config);
+    let context = CallContext {
+        caller_id: caller_id.to_string(),
+        destination: destination.to_string(),
+    };
+    
+    match evaluator.evaluate(&context) {
+        Some(route_match) => (
+            StatusCode::OK,
+            Json(json!({
+                "success": true,
+                "matched": true,
+                "route_id": route_match.route_id,
+                "route_name": route_match.route_name,
+                "destination": route_match.destination,
+                "action": route_match.action,
+            })),
+        ),
+        None => (
+            StatusCode::OK,
+            Json(json!({
+                "success": true,
+                "matched": false,
+                "message": "No routes matched the test criteria"
+            })),
+        ),
+    }
+}

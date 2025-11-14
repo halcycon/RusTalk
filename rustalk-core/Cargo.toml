@@ -25,6 +25,8 @@ rcgen = { workspace = true }
 base64 = "0.22"
 x509-parser = "0.16"
 sha2 = "0.10"
+regex = { workspace = true }
+chrono = { workspace = true }
 
 [dev-dependencies]
 tokio-test = "0.4"

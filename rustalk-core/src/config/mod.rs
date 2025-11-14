@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 use tokio::fs;
 
 use crate::media::CodecConfig;
+use crate::routing::RoutingConfig;
 
 /// Main configuration structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -18,6 +19,7 @@ pub struct Config {
     pub teams: Option<TeamsConfig>,
     pub acme: Option<AcmeConfig>,
     pub codecs: Option<CodecConfig>,
+    pub routing: Option<RoutingConfig>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -175,6 +177,7 @@ impl Default for Config {
             teams: None,
             acme: None,
             codecs: Some(CodecConfig::default()),
+            routing: Some(RoutingConfig::default()),
         }
     }
 }

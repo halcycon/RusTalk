@@ -190,16 +190,102 @@ pub enum RingStrategy {
     RoundRobin,   // Distribute calls evenly
 }
 
-/// Route/Dialplan configuration
+/// Route/Dialplan configuration with advanced conditions
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Route {
     pub id: String,
     pub name: String,
     pub description: Option<String>,
-    pub pattern: String, // Regex or pattern to match
-    pub destination: String, // Where to route the call
+    pub pattern: String, // Regex or pattern to match destination number
+    pub destination: RouteDestination, // Where to route the call
     pub enabled: bool,
     pub priority: u32,
+    /// Optional conditions that must all match for this route to apply
+    pub conditions: Option<Vec<RouteCondition>>,
+    /// Action to take when route matches
+    pub action: RouteAction,
+    /// Whether to continue processing more routes after this one matches
+    pub continue_on_match: bool,
+}
+
+/// Destination type for a route
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type", content = "value")]
+pub enum RouteDestination {
+    Extension(String),       // Route to specific extension
+    Trunk(String),          // Route to trunk
+    RingGroup(String),      // Route to ring group
+    Voicemail(String),      // Send to voicemail
+    Hangup,                 // Hangup the call
+    Custom(String),         // Custom destination string
+}
+
+/// Action to perform when route matches
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum RouteAction {
+    Accept,   // Accept and route the call
+    Reject,   // Reject the call
+    Continue, // Continue to next route
+}
+
+/// Routing conditions that must match
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
+pub enum RouteCondition {
+    /// Time-based condition
+    Time(TimeCondition),
+    /// Day of week condition
+    DayOfWeek(DayOfWeekCondition),
+    /// Date range condition
+    DateRange(DateRangeCondition),
+    /// Caller ID pattern match
+    CallerId(CallerIdCondition),
+    /// Called number (destination) pattern match
+    Destination(DestinationCondition),
+}
+
+/// Time of day condition (in 24-hour format)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TimeCondition {
+    /// Start time (HH:MM format, e.g., "09:00")
+    pub start_time: String,
+    /// End time (HH:MM format, e.g., "17:00")
+    pub end_time: String,
+}
+
+/// Day of week condition
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DayOfWeekCondition {
+    /// Days when this route is active (1=Monday, 7=Sunday)
+    pub days: Vec<u8>,
+}
+
+/// Date range condition
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DateRangeCondition {
+    /// Start date (ISO 8601: YYYY-MM-DD)
+    pub start_date: String,
+    /// End date (ISO 8601: YYYY-MM-DD)
+    pub end_date: String,
+}
+
+/// Caller ID filtering condition
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CallerIdCondition {
+    /// Pattern to match caller ID (regex)
+    pub pattern: String,
+    /// Whether to invert the match
+    pub negate: bool,
+}
+
+/// Destination number filtering condition
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DestinationCondition {
+    /// Pattern to match destination (regex)
+    pub pattern: String,
+    /// Whether to invert the match
+    pub negate: bool,
 }
 
 /// SIP Profile configuration
