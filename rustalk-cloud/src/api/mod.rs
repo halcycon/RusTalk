@@ -64,6 +64,7 @@ impl CloudApi {
     }
 
     /// Build the API router
+    #[allow(clippy::too_many_arguments)]
     fn router(
         webui_path: Option<String>,
         acme_state: AcmeState,

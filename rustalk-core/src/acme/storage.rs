@@ -1,12 +1,12 @@
 //! Certificate storage and management
 
-use anyhow::{Context, Result};
-use rustls_pemfile::{certs, pkcs8_private_keys};
+use anyhow::Result;
+use rustls_pemfile::certs;
 use serde::{Deserialize, Serialize};
 use std::io::BufReader;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use tokio::fs;
-use tracing::{info, warn};
+use tracing::info;
 
 /// Information about a stored certificate
 #[derive(Debug, Clone, Serialize, Deserialize)]

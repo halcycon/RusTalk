@@ -1,6 +1,7 @@
 //! SIP Methods
 
 use std::fmt;
+use std::str::FromStr;
 
 /// SIP Method types
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -51,29 +52,33 @@ impl Method {
             Method::Message => "MESSAGE",
         }
     }
-
-    pub fn from_str(s: &str) -> Option<Self> {
-        match s {
-            "INVITE" => Some(Method::Invite),
-            "ACK" => Some(Method::Ack),
-            "BYE" => Some(Method::Bye),
-            "CANCEL" => Some(Method::Cancel),
-            "REGISTER" => Some(Method::Register),
-            "OPTIONS" => Some(Method::Options),
-            "INFO" => Some(Method::Info),
-            "PRACK" => Some(Method::Prack),
-            "SUBSCRIBE" => Some(Method::Subscribe),
-            "NOTIFY" => Some(Method::Notify),
-            "UPDATE" => Some(Method::Update),
-            "REFER" => Some(Method::Refer),
-            "MESSAGE" => Some(Method::Message),
-            _ => None,
-        }
-    }
 }
 
 impl fmt::Display for Method {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_str())
+    }
+}
+
+impl FromStr for Method {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "INVITE" => Ok(Method::Invite),
+            "ACK" => Ok(Method::Ack),
+            "BYE" => Ok(Method::Bye),
+            "CANCEL" => Ok(Method::Cancel),
+            "REGISTER" => Ok(Method::Register),
+            "OPTIONS" => Ok(Method::Options),
+            "INFO" => Ok(Method::Info),
+            "PRACK" => Ok(Method::Prack),
+            "SUBSCRIBE" => Ok(Method::Subscribe),
+            "NOTIFY" => Ok(Method::Notify),
+            "UPDATE" => Ok(Method::Update),
+            "REFER" => Ok(Method::Refer),
+            "MESSAGE" => Ok(Method::Message),
+            _ => Err(format!("Unknown SIP method: {}", s)),
+        }
     }
 }

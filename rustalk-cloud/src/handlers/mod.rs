@@ -64,7 +64,7 @@ pub async fn get_config() -> (StatusCode, Json<Value>) {
 }
 
 /// Update configuration
-pub async fn update_config(Json(payload): Json<Value>) -> (StatusCode, Json<Value>) {
+pub async fn update_config(Json(_payload): Json<Value>) -> (StatusCode, Json<Value>) {
     // Placeholder - would update database
     (
         StatusCode::OK,

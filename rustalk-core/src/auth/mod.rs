@@ -133,6 +133,7 @@ impl AuthManager {
     }
 
     /// Calculate the digest response value
+    #[allow(clippy::too_many_arguments)]
     fn calculate_response(
         &self,
         username: &str,

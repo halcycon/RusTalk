@@ -1,7 +1,7 @@
 //! TLS/mTLS Transport implementation for secure SIP (SIPS)
 
 use super::{Transport, TransportConfig};
-use crate::sip::{parser::parse_message, Message};
+use crate::sip::Message;
 use anyhow::Result;
 use rustls::{ClientConfig, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
@@ -9,11 +9,11 @@ use std::fs::File;
 use std::io::BufReader;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tokio::net::TcpListener;
 use tracing::{debug, info};
 
 pub struct TlsTransport {
     local_addr: SocketAddr,
+    #[allow(dead_code)]
     server_config: Arc<ServerConfig>,
 }
 

@@ -67,7 +67,7 @@ pub enum ModuleActionType {
 
 /// Parse a console command from input string
 pub fn parse_command(input: &str) -> Result<ConsoleCommand> {
-    let parts: Vec<&str> = input.trim().split_whitespace().collect();
+    let parts: Vec<&str> = input.split_whitespace().collect();
 
     if parts.is_empty() {
         anyhow::bail!("Empty command");

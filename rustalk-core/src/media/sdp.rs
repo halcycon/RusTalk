@@ -65,35 +65,35 @@ impl SdpSession {
 
         Ok(session)
     }
+}
 
-    /// Serialize to SDP string
-    pub fn to_string(&self) -> String {
-        let mut sdp = String::new();
-
-        sdp.push_str(&format!("v={}\r\n", self.version));
-        sdp.push_str(&format!("o={}\r\n", self.origin));
-        sdp.push_str(&format!("s={}\r\n", self.session_name));
+impl std::fmt::Display for SdpSession {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "v={}\r\n", self.version)?;
+        write!(f, "o={}\r\n", self.origin)?;
+        write!(f, "s={}\r\n", self.session_name)?;
 
         if let Some(conn) = &self.connection {
-            sdp.push_str(&format!("c={}\r\n", conn));
+            write!(f, "c={}\r\n", conn)?;
         }
 
-        sdp.push_str("t=0 0\r\n");
+        write!(f, "t=0 0\r\n")?;
 
         for media in &self.media {
             let formats = media
                 .formats
                 .iter()
-                .map(|f| f.to_string())
+                .map(|fmt| fmt.to_string())
                 .collect::<Vec<_>>()
                 .join(" ");
-            sdp.push_str(&format!(
+            write!(
+                f,
                 "m={} {} {} {}\r\n",
                 media.media_type, media.port, media.protocol, formats
-            ));
+            )?;
         }
 
-        sdp
+        Ok(())
     }
 }
 

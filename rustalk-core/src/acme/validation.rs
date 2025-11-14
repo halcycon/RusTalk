@@ -25,6 +25,7 @@ pub struct ValidationResult {
 /// Challenge validator
 pub struct ChallengeValidator {
     challenge_type: ChallengeType,
+    #[allow(dead_code)]
     http_port: u16,
     tokens: Arc<RwLock<std::collections::HashMap<String, String>>>,
 }
@@ -147,6 +148,7 @@ impl ChallengeValidator {
     }
 
     /// Get the key authorization for a token (for HTTP server)
+    #[allow(dead_code)]
     pub async fn get_key_authorization(&self, token: &str) -> Option<String> {
         let tokens = self.tokens.read().await;
         tokens.get(token).cloned()

@@ -66,7 +66,7 @@ impl B2BUA {
             .ok_or_else(|| anyhow::anyhow!("No Call-ID in response"))?;
 
         let sessions = self.sessions.read().await;
-        if let Some(session) = sessions.values().find(|s| s.call_id() == call_id) {
+        if let Some(_session) = sessions.values().find(|s| s.call_id() == call_id) {
             // Forward response to the other leg
             debug!("Forwarding response to other leg");
             // In a real implementation, we would modify headers and forward
