@@ -212,12 +212,12 @@ pub struct Route {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", content = "value")]
 pub enum RouteDestination {
-    Extension(String),       // Route to specific extension
-    Trunk(String),          // Route to trunk
-    RingGroup(String),      // Route to ring group
-    Voicemail(String),      // Send to voicemail
-    Hangup,                 // Hangup the call
-    Custom(String),         // Custom destination string
+    Extension(String), // Route to specific extension
+    Trunk(String),     // Route to trunk
+    RingGroup(String), // Route to ring group
+    Voicemail(String), // Send to voicemail
+    Hangup,            // Hangup the call
+    Custom(String),    // Custom destination string
 }
 
 /// Action to perform when route matches

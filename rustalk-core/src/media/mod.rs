@@ -64,7 +64,7 @@ impl MediaSession {
                         self.rtp_port = Some(port);
                     }
                 }
-                
+
                 // Check for SRTP
                 if line.contains("RTP/SAVP") || line.contains("RTP/SAVPF") {
                     self.srtp_enabled = true;
@@ -100,7 +100,7 @@ mod tests {
                    c=IN IP4 192.168.1.100\r\n\
                    t=0 0\r\n\
                    m=audio 49170 RTP/AVP 0\r\n";
-        
+
         session.parse_sdp(sdp).unwrap();
         assert_eq!(session.rtp_address, Some("192.168.1.100".to_string()));
         assert_eq!(session.rtp_port, Some(49170));

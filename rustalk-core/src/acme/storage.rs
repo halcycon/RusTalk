@@ -119,7 +119,7 @@ impl CertificateStorage {
 
         // Parse the first certificate
         let cert = &cert_ders[0];
-        
+
         // Use x509-parser for detailed certificate parsing
         use x509_parser::prelude::*;
         let (_, parsed_cert) = X509Certificate::from_der(cert.as_ref())
@@ -147,7 +147,9 @@ impl CertificateStorage {
 
         // Get expiry date
         let not_after = parsed_cert.validity().not_after;
-        let expires_at = not_after.to_rfc2822().unwrap_or_else(|_| "Unknown".to_string());
+        let expires_at = not_after
+            .to_rfc2822()
+            .unwrap_or_else(|_| "Unknown".to_string());
 
         // Calculate days until expiry
         let now = std::time::SystemTime::now()
@@ -190,7 +192,10 @@ impl CertificateStorage {
             let path = entry.path();
             if let Some(name) = path.file_name() {
                 if let Some(name_str) = name.to_str() {
-                    if name_str.ends_with(".pem") && !name_str.ends_with("-key.pem") && !name_str.ends_with(".backup") {
+                    if name_str.ends_with(".pem")
+                        && !name_str.ends_with("-key.pem")
+                        && !name_str.ends_with(".backup")
+                    {
                         if let Some(domain) = name_str.strip_suffix(".pem") {
                             certificates.push(domain.to_string());
                         }
@@ -228,10 +233,10 @@ mod tests {
     #[tokio::test]
     async fn test_storage_paths() {
         let storage = CertificateStorage::new(PathBuf::from("/tmp/test_certs")).unwrap();
-        
+
         let cert_path = storage.cert_path("example.com");
         assert!(cert_path.to_str().unwrap().contains("example.com.pem"));
-        
+
         let key_path = storage.key_path("example.com");
         assert!(key_path.to_str().unwrap().contains("example.com-key.pem"));
     }
@@ -240,11 +245,11 @@ mod tests {
     async fn test_certificate_exists() {
         let temp_dir = PathBuf::from("/tmp/test_cert_exists");
         let _ = fs::remove_dir_all(&temp_dir).await;
-        
+
         let storage = CertificateStorage::new(temp_dir.clone()).unwrap();
-        
+
         assert!(!storage.certificate_exists("test.com").await);
-        
+
         // Clean up
         let _ = fs::remove_dir_all(&temp_dir).await;
     }

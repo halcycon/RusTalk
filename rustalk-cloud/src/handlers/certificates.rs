@@ -37,7 +37,7 @@ pub async fn get_certificate_status(
     Path(domain): Path<String>,
 ) -> (StatusCode, Json<Value>) {
     let acme_lock = acme_state.read().await;
-    
+
     let Some(client) = acme_lock.as_ref() else {
         return (
             StatusCode::SERVICE_UNAVAILABLE,
@@ -96,11 +96,9 @@ pub async fn get_certificate_status(
 }
 
 /// List all certificates
-pub async fn list_certificates(
-    State(acme_state): State<AcmeState>,
-) -> (StatusCode, Json<Value>) {
+pub async fn list_certificates(State(acme_state): State<AcmeState>) -> (StatusCode, Json<Value>) {
     let acme_lock = acme_state.read().await;
-    
+
     let Some(client) = acme_lock.as_ref() else {
         return (
             StatusCode::SERVICE_UNAVAILABLE,
@@ -113,7 +111,7 @@ pub async fn list_certificates(
     match client.storage().list_certificates().await {
         Ok(domains) => {
             let mut certificates = Vec::new();
-            
+
             for domain in domains {
                 if let Ok(cert_info) = client.storage().get_certificate_info(&domain).await {
                     let status = if cert_info.days_until_expiry > 30 {
@@ -161,10 +159,13 @@ pub async fn request_certificate(
     State(acme_state): State<AcmeState>,
     Json(payload): Json<CertificateRequestPayload>,
 ) -> (StatusCode, Json<Value>) {
-    info!("Certificate request: domains={:?}, email={}", payload.domains, payload.email);
+    info!(
+        "Certificate request: domains={:?}, email={}",
+        payload.domains, payload.email
+    );
 
     let acme_lock = acme_state.read().await;
-    
+
     let Some(client) = acme_lock.as_ref() else {
         return (
             StatusCode::SERVICE_UNAVAILABLE,
@@ -196,9 +197,13 @@ pub async fn request_certificate(
     {
         Ok(_) => {
             info!("Certificate issued for domains: {:?}", payload.domains);
-            
+
             // Get certificate info
-            match client.storage().get_certificate_info(&payload.domains[0]).await {
+            match client
+                .storage()
+                .get_certificate_info(&payload.domains[0])
+                .await
+            {
                 Ok(cert_info) => (
                     StatusCode::CREATED,
                     Json(json!({
@@ -244,7 +249,7 @@ pub async fn renew_certificate(
     info!("Certificate renewal request: domain={}", payload.domain);
 
     let acme_lock = acme_state.read().await;
-    
+
     let Some(client) = acme_lock.as_ref() else {
         return (
             StatusCode::SERVICE_UNAVAILABLE,
@@ -287,7 +292,7 @@ pub async fn renew_certificate(
     match client.renew_certificate(&payload.domain).await {
         Ok(_) => {
             info!("Certificate renewed for domain: {}", payload.domain);
-            
+
             // Get updated certificate info
             match client.storage().get_certificate_info(&payload.domain).await {
                 Ok(cert_info) => (

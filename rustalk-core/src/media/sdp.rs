@@ -34,7 +34,7 @@ impl SdpSession {
     /// Parse SDP from string
     pub fn parse(sdp: &str) -> Result<Self> {
         let mut session = Self::new();
-        
+
         for line in sdp.lines() {
             let line = line.trim();
             if line.is_empty() {
@@ -56,10 +56,7 @@ impl SdpSession {
                         media_type: parts[0].to_string(),
                         port: parts[1].parse()?,
                         protocol: parts[2].to_string(),
-                        formats: parts[3..]
-                            .iter()
-                            .filter_map(|f| f.parse().ok())
-                            .collect(),
+                        formats: parts[3..].iter().filter_map(|f| f.parse().ok()).collect(),
                     };
                     session.media.push(media);
                 }
@@ -72,19 +69,20 @@ impl SdpSession {
     /// Serialize to SDP string
     pub fn to_string(&self) -> String {
         let mut sdp = String::new();
-        
+
         sdp.push_str(&format!("v={}\r\n", self.version));
         sdp.push_str(&format!("o={}\r\n", self.origin));
         sdp.push_str(&format!("s={}\r\n", self.session_name));
-        
+
         if let Some(conn) = &self.connection {
             sdp.push_str(&format!("c={}\r\n", conn));
         }
-        
+
         sdp.push_str("t=0 0\r\n");
-        
+
         for media in &self.media {
-            let formats = media.formats
+            let formats = media
+                .formats
                 .iter()
                 .map(|f| f.to_string())
                 .collect::<Vec<_>>()

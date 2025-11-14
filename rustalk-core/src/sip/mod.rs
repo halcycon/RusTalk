@@ -1,15 +1,15 @@
 //! SIP Protocol implementation
 
-pub mod message;
-pub mod parser;
-pub mod method;
 pub mod header;
+pub mod message;
+pub mod method;
+pub mod parser;
 pub mod response;
 
+pub use header::{Header, HeaderName, HeaderValue};
 pub use message::{Message, Request, Response};
 pub use method::Method;
 pub use response::StatusCode;
-pub use header::{Header, HeaderName, HeaderValue};
 
 use std::net::SocketAddr;
 

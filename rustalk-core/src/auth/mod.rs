@@ -57,7 +57,7 @@ impl AuthManager {
     /// Generate a new digest challenge
     pub fn generate_challenge(&mut self) -> DigestChallenge {
         let nonce = self.generate_nonce();
-        
+
         DigestChallenge {
             realm: self.realm.clone(),
             nonce,
@@ -72,16 +72,19 @@ impl AuthManager {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        
+
         // Create a unique nonce using timestamp and random component
         let nonce = format!("{:x}{:x}", timestamp, rand::random::<u64>());
-        
+
         // Store nonce info for validation
-        self.nonces.insert(nonce.clone(), NonceInfo {
-            timestamp,
-            used: false,
-        });
-        
+        self.nonces.insert(
+            nonce.clone(),
+            NonceInfo {
+                timestamp,
+                used: false,
+            },
+        );
+
         nonce
     }
 
@@ -93,25 +96,27 @@ impl AuthManager {
         method: &str,
     ) -> Result<bool> {
         // Check if nonce is valid and not expired
-        let nonce_info = self.nonces.get_mut(&response.nonce)
+        let nonce_info = self
+            .nonces
+            .get_mut(&response.nonce)
             .context("Invalid nonce")?;
-        
+
         // Check nonce age (valid for 5 minutes)
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        
+
         if now - nonce_info.timestamp > 300 {
             anyhow::bail!("Nonce expired");
         }
-        
+
         // Mark nonce as used (prevent replay)
         if nonce_info.used {
             anyhow::bail!("Nonce already used");
         }
         nonce_info.used = true;
-        
+
         // Calculate expected response
         let expected = self.calculate_response(
             &response.username,
@@ -123,7 +128,7 @@ impl AuthManager {
             response.cnonce.as_deref(),
             response.qop.as_deref(),
         )?;
-        
+
         Ok(expected == response.response)
     }
 
@@ -142,11 +147,11 @@ impl AuthManager {
         // HA1 = MD5(username:realm:password)
         let ha1_input = format!("{}:{}:{}", username, self.realm, password);
         let ha1 = format!("{:x}", md5::compute(ha1_input.as_bytes()));
-        
+
         // HA2 = MD5(method:uri)
         let ha2_input = format!("{}:{}", method, uri);
         let ha2 = format!("{:x}", md5::compute(ha2_input.as_bytes()));
-        
+
         // Response calculation depends on qop
         let response = if let Some("auth") = qop {
             // Response = MD5(HA1:nonce:nc:cnonce:qop:HA2)
@@ -159,7 +164,7 @@ impl AuthManager {
             let response_input = format!("{}:{}:{}", ha1, nonce, ha2);
             format!("{:x}", md5::compute(response_input.as_bytes()))
         };
-        
+
         Ok(response)
     }
 
@@ -183,24 +188,20 @@ impl AuthManager {
         if !header.starts_with("Digest ") {
             anyhow::bail!("Not a Digest authorization header");
         }
-        
+
         let params_str = &header[7..]; // Skip "Digest "
         let params = parse_auth_params(params_str)?;
-        
+
         Ok(DigestResponse {
-            username: params.get("username")
+            username: params
+                .get("username")
                 .context("Missing username")?
                 .to_string(),
-            realm: params.get("realm")
-                .context("Missing realm")?
-                .to_string(),
-            nonce: params.get("nonce")
-                .context("Missing nonce")?
-                .to_string(),
-            uri: params.get("uri")
-                .context("Missing uri")?
-                .to_string(),
-            response: params.get("response")
+            realm: params.get("realm").context("Missing realm")?.to_string(),
+            nonce: params.get("nonce").context("Missing nonce")?.to_string(),
+            uri: params.get("uri").context("Missing uri")?.to_string(),
+            response: params
+                .get("response")
                 .context("Missing response")?
                 .to_string(),
             algorithm: params.get("algorithm").map(|s| s.to_string()),
@@ -216,7 +217,7 @@ impl AuthManager {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        
+
         self.nonces.retain(|_, info| now - info.timestamp <= 300);
     }
 }
@@ -224,25 +225,27 @@ impl AuthManager {
 /// Parse authentication parameters from header value
 fn parse_auth_params(params_str: &str) -> Result<HashMap<String, String>> {
     let mut params = HashMap::new();
-    
+
     for part in params_str.split(',') {
         let part = part.trim();
-        
+
         if let Some(eq_pos) = part.find('=') {
             let key = part[..eq_pos].trim().to_string();
             let value_part = part[eq_pos + 1..].trim();
-            
+
             // Handle quoted values
-            let value = if value_part.starts_with('"') && value_part.ends_with('"') && value_part.len() > 1 {
-                value_part[1..value_part.len() - 1].to_string()
-            } else {
-                value_part.to_string()
-            };
-            
+            let value =
+                if value_part.starts_with('"') && value_part.ends_with('"') && value_part.len() > 1
+                {
+                    value_part[1..value_part.len() - 1].to_string()
+                } else {
+                    value_part.to_string()
+                };
+
             params.insert(key, value);
         }
     }
-    
+
     Ok(params)
 }
 
@@ -254,7 +257,7 @@ mod tests {
     fn test_generate_challenge() {
         let mut auth = AuthManager::new("rustalk.local");
         let challenge = auth.generate_challenge();
-        
+
         assert_eq!(challenge.realm, "rustalk.local");
         assert!(!challenge.nonce.is_empty());
         assert_eq!(challenge.algorithm, "MD5");
@@ -269,7 +272,7 @@ mod tests {
             algorithm: "MD5".to_string(),
             qop: Some("auth".to_string()),
         };
-        
+
         let formatted = AuthManager::format_challenge(&challenge);
         assert!(formatted.contains("realm=\"test.com\""));
         assert!(formatted.contains("nonce=\"abc123\""));
@@ -279,7 +282,7 @@ mod tests {
     #[test]
     fn test_parse_authorization() {
         let header = r#"Digest username="alice", realm="test.com", nonce="abc123", uri="sip:test.com", response="6629fae49393a05397450978507c4ef1""#;
-        
+
         let response = AuthManager::parse_authorization(header).unwrap();
         assert_eq!(response.username, "alice");
         assert_eq!(response.realm, "test.com");
@@ -291,24 +294,26 @@ mod tests {
     fn test_validate_response() {
         let mut auth = AuthManager::new("rustalk.local");
         let challenge = auth.generate_challenge();
-        
+
         // Calculate response for test
         let password = "secret123";
         let username = "alice";
         let method = "REGISTER";
         let uri = "sip:rustalk.local";
-        
-        let response = auth.calculate_response(
-            username,
-            password,
-            method,
-            uri,
-            &challenge.nonce,
-            Some("00000001"),
-            Some("xyz789"),
-            Some("auth"),
-        ).unwrap();
-        
+
+        let response = auth
+            .calculate_response(
+                username,
+                password,
+                method,
+                uri,
+                &challenge.nonce,
+                Some("00000001"),
+                Some("xyz789"),
+                Some("auth"),
+            )
+            .unwrap();
+
         let digest_response = DigestResponse {
             username: username.to_string(),
             realm: challenge.realm.clone(),
@@ -320,31 +325,35 @@ mod tests {
             nc: Some("00000001".to_string()),
             cnonce: Some("xyz789".to_string()),
         };
-        
-        assert!(auth.validate_response(&digest_response, password, method).unwrap());
+
+        assert!(auth
+            .validate_response(&digest_response, password, method)
+            .unwrap());
     }
 
     #[test]
     fn test_nonce_reuse_prevention() {
         let mut auth = AuthManager::new("rustalk.local");
         let challenge = auth.generate_challenge();
-        
+
         let password = "secret123";
         let username = "alice";
         let method = "REGISTER";
         let uri = "sip:rustalk.local";
-        
-        let response = auth.calculate_response(
-            username,
-            password,
-            method,
-            uri,
-            &challenge.nonce,
-            Some("00000001"),
-            Some("xyz789"),
-            Some("auth"),
-        ).unwrap();
-        
+
+        let response = auth
+            .calculate_response(
+                username,
+                password,
+                method,
+                uri,
+                &challenge.nonce,
+                Some("00000001"),
+                Some("xyz789"),
+                Some("auth"),
+            )
+            .unwrap();
+
         let digest_response = DigestResponse {
             username: username.to_string(),
             realm: challenge.realm.clone(),
@@ -356,24 +365,28 @@ mod tests {
             nc: Some("00000001".to_string()),
             cnonce: Some("xyz789".to_string()),
         };
-        
+
         // First use should succeed
-        assert!(auth.validate_response(&digest_response, password, method).is_ok());
-        
+        assert!(auth
+            .validate_response(&digest_response, password, method)
+            .is_ok());
+
         // Second use with same nonce should fail (replay attack prevention)
-        assert!(auth.validate_response(&digest_response, password, method).is_err());
+        assert!(auth
+            .validate_response(&digest_response, password, method)
+            .is_err());
     }
 
     #[test]
     fn test_cleanup_nonces() {
         let mut auth = AuthManager::new("rustalk.local");
-        
+
         // Generate some challenges
         auth.generate_challenge();
         auth.generate_challenge();
-        
+
         assert_eq!(auth.nonces.len(), 2);
-        
+
         // Cleanup should not remove recent nonces
         auth.cleanup_nonces();
         assert_eq!(auth.nonces.len(), 2);

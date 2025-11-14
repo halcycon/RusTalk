@@ -134,8 +134,7 @@ impl AclManager {
 fn matches_cidr(ip: IpAddr, cidr: &str) -> Result<bool> {
     // Handle single IP addresses
     if !cidr.contains('/') {
-        let target_ip = IpAddr::from_str(cidr)
-            .context(format!("Invalid IP address: {}", cidr))?;
+        let target_ip = IpAddr::from_str(cidr).context(format!("Invalid IP address: {}", cidr))?;
         return Ok(ip == target_ip);
     }
 
@@ -145,8 +144,8 @@ fn matches_cidr(ip: IpAddr, cidr: &str) -> Result<bool> {
         anyhow::bail!("Invalid CIDR format: {}", cidr);
     }
 
-    let network = IpAddr::from_str(parts[0])
-        .context(format!("Invalid network address: {}", parts[0]))?;
+    let network =
+        IpAddr::from_str(parts[0]).context(format!("Invalid network address: {}", parts[0]))?;
     let prefix_len: u8 = parts[1]
         .parse()
         .context(format!("Invalid prefix length: {}", parts[1]))?;
@@ -316,7 +315,7 @@ mod tests {
     fn test_acl_priority() {
         let mut acl = Acl::new("test");
         acl.default_policy = AclAction::Deny;
-        
+
         // Higher priority rule (lower number) should win
         acl.add_rule(AclRule {
             name: "specific_deny".to_string(),
@@ -357,14 +356,14 @@ mod tests {
     #[test]
     fn test_default_acls() {
         let manager = create_default_acls();
-        
+
         // Test RFC 1918
         let ip = IpAddr::from_str("192.168.1.1").unwrap();
         assert!(manager.is_allowed("rfc1918", ip).unwrap());
-        
+
         let ip2 = IpAddr::from_str("8.8.8.8").unwrap();
         assert!(!manager.is_allowed("rfc1918", ip2).unwrap());
-        
+
         // Test localhost
         let ip3 = IpAddr::from_str("127.0.0.1").unwrap();
         assert!(manager.is_allowed("localhost", ip3).unwrap());

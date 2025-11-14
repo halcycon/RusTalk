@@ -39,10 +39,10 @@ impl Default for TransportConfig {
 pub trait Transport: Send + Sync {
     /// Send a message
     async fn send(&self, message: &Message, dest: SocketAddr) -> Result<()>;
-    
+
     /// Receive messages (blocking)
     async fn receive(&self) -> Result<(Message, SocketAddr)>;
-    
+
     /// Get local address
     fn local_addr(&self) -> SocketAddr;
 }

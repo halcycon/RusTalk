@@ -40,12 +40,7 @@ impl ChallengeValidator {
     }
 
     /// Set up challenge validation
-    pub async fn setup(
-        &self,
-        domain: &str,
-        token: &str,
-        key_authorization: &str,
-    ) -> Result<()> {
+    pub async fn setup(&self, domain: &str, token: &str, key_authorization: &str) -> Result<()> {
         match self.challenge_type {
             ChallengeType::Http01 => {
                 self.setup_http_challenge(domain, token, key_authorization)
@@ -86,7 +81,7 @@ impl ChallengeValidator {
         // In a real implementation, this would start a temporary HTTP server
         // on port 80 to serve the challenge response at:
         // http://<domain>/.well-known/acme-challenge/<token>
-        
+
         info!(
             "HTTP-01 challenge ready at http://{}/.well-known/acme-challenge/{}",
             domain, token
@@ -132,7 +127,7 @@ impl ChallengeValidator {
 
         // In a real implementation, this would automatically update DNS records
         // using a DNS provider API (e.g., CloudFlare, Route53, etc.)
-        
+
         println!("\nPlease create the following DNS TXT record:");
         println!("  Name: _acme-challenge.{}", domain);
         println!("  Value: {}", txt_value);
@@ -140,7 +135,7 @@ impl ChallengeValidator {
 
         // Wait for user confirmation (in production, would poll DNS)
         // This is a simplified implementation
-        
+
         Ok(())
     }
 
@@ -182,7 +177,10 @@ mod tests {
             .await
             .unwrap();
 
-        validator.cleanup("example.com", "test_token").await.unwrap();
+        validator
+            .cleanup("example.com", "test_token")
+            .await
+            .unwrap();
 
         let key_auth = validator.get_key_authorization("test_token").await;
         assert_eq!(key_auth, None);

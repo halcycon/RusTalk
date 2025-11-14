@@ -70,7 +70,11 @@ impl Request {
         }
     }
 
-    pub fn with_header(mut self, name: impl Into<super::HeaderName>, value: impl Into<super::HeaderValue>) -> Self {
+    pub fn with_header(
+        mut self,
+        name: impl Into<super::HeaderName>,
+        value: impl Into<super::HeaderValue>,
+    ) -> Self {
         self.headers.push(Header::new(name, value));
         self
     }
@@ -81,7 +85,9 @@ impl Request {
     }
 
     pub fn get_header(&self, name: &str) -> Option<&Header> {
-        self.headers.iter().find(|h| h.name.as_str().eq_ignore_ascii_case(name))
+        self.headers
+            .iter()
+            .find(|h| h.name.as_str().eq_ignore_ascii_case(name))
     }
 
     pub fn get_header_value(&self, name: &str) -> Option<&str> {
@@ -91,21 +97,23 @@ impl Request {
     /// Serialize to bytes
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut result = Vec::new();
-        
+
         // Request line
-        result.extend_from_slice(format!("{} {} {}\r\n", self.method, self.uri, self.version).as_bytes());
-        
+        result.extend_from_slice(
+            format!("{} {} {}\r\n", self.method, self.uri, self.version).as_bytes(),
+        );
+
         // Headers
         for header in &self.headers {
             result.extend_from_slice(format!("{}: {}\r\n", header.name, header.value).as_bytes());
         }
-        
+
         // Empty line
         result.extend_from_slice(b"\r\n");
-        
+
         // Body
         result.extend_from_slice(&self.body);
-        
+
         result
     }
 }
@@ -132,7 +140,11 @@ impl Response {
         }
     }
 
-    pub fn with_header(mut self, name: impl Into<super::HeaderName>, value: impl Into<super::HeaderValue>) -> Self {
+    pub fn with_header(
+        mut self,
+        name: impl Into<super::HeaderName>,
+        value: impl Into<super::HeaderValue>,
+    ) -> Self {
         self.headers.push(Header::new(name, value));
         self
     }
@@ -143,7 +155,9 @@ impl Response {
     }
 
     pub fn get_header(&self, name: &str) -> Option<&Header> {
-        self.headers.iter().find(|h| h.name.as_str().eq_ignore_ascii_case(name))
+        self.headers
+            .iter()
+            .find(|h| h.name.as_str().eq_ignore_ascii_case(name))
     }
 
     pub fn get_header_value(&self, name: &str) -> Option<&str> {
@@ -153,21 +167,27 @@ impl Response {
     /// Serialize to bytes
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut result = Vec::new();
-        
+
         // Status line
-        result.extend_from_slice(format!("{} {} {}\r\n", self.version, self.status_code, self.reason_phrase).as_bytes());
-        
+        result.extend_from_slice(
+            format!(
+                "{} {} {}\r\n",
+                self.version, self.status_code, self.reason_phrase
+            )
+            .as_bytes(),
+        );
+
         // Headers
         for header in &self.headers {
             result.extend_from_slice(format!("{}: {}\r\n", header.name, header.value).as_bytes());
         }
-        
+
         // Empty line
         result.extend_from_slice(b"\r\n");
-        
+
         // Body
         result.extend_from_slice(&self.body);
-        
+
         result
     }
 }

@@ -1,9 +1,9 @@
 //! REST API service implementation
 
 use crate::handlers::{self, certificates::AcmeState};
-use crate::models::{Did, Extension, Trunk, RingGroup, Route, SipProfile};
+use crate::models::{Did, Extension, RingGroup, Route, SipProfile, Trunk};
 use axum::{
-    routing::{get, post, put, delete},
+    routing::{delete, get, post, put},
     Router,
 };
 use std::net::SocketAddr;
@@ -31,7 +31,7 @@ pub struct CloudApi {
 
 impl CloudApi {
     pub fn new(addr: SocketAddr) -> Self {
-        Self { 
+        Self {
             addr,
             webui_path: None,
             acme_client: None,
@@ -83,68 +83,227 @@ impl CloudApi {
             .route("/api/v1/config", post(handlers::update_config))
             .route("/api/v1/stats", get(handlers::get_stats))
             // Certificate management endpoints
-            .route("/api/v1/certificates", get(handlers::certificates::list_certificates))
-            .route("/api/v1/certificates/:domain", get(handlers::certificates::get_certificate_status))
-            .route("/api/v1/certificates/request", post(handlers::certificates::request_certificate))
-            .route("/api/v1/certificates/renew", post(handlers::certificates::renew_certificate))
+            .route(
+                "/api/v1/certificates",
+                get(handlers::certificates::list_certificates),
+            )
+            .route(
+                "/api/v1/certificates/:domain",
+                get(handlers::certificates::get_certificate_status),
+            )
+            .route(
+                "/api/v1/certificates/request",
+                post(handlers::certificates::request_certificate),
+            )
+            .route(
+                "/api/v1/certificates/renew",
+                post(handlers::certificates::renew_certificate),
+            )
             // Call logs and ratings endpoints
-            .route("/api/v1/call-logs", get(handlers::call_logs::list_call_logs))
-            .route("/api/v1/call-logs/:id", get(handlers::call_logs::get_call_log))
-            .route("/api/v1/call-logs/export", post(handlers::call_logs::export_call_logs))
+            .route(
+                "/api/v1/call-logs",
+                get(handlers::call_logs::list_call_logs),
+            )
+            .route(
+                "/api/v1/call-logs/:id",
+                get(handlers::call_logs::get_call_log),
+            )
+            .route(
+                "/api/v1/call-logs/export",
+                post(handlers::call_logs::export_call_logs),
+            )
             .route("/api/v1/rates", get(handlers::call_logs::list_rates))
-            .route("/api/v1/rates/import", post(handlers::call_logs::import_rates))
+            .route(
+                "/api/v1/rates/import",
+                post(handlers::call_logs::import_rates),
+            )
             .route("/api/v1/rates", post(handlers::call_logs::save_rate))
-            .route("/api/v1/rates/:id", axum::routing::delete(handlers::call_logs::delete_rate))
+            .route(
+                "/api/v1/rates/:id",
+                axum::routing::delete(handlers::call_logs::delete_rate),
+            )
             .with_state(acme_state)
             // Codec management endpoints (using separate state)
-            .route("/api/v1/codecs", get(handlers::codecs::list_codecs).with_state(codec_state.clone()))
-            .route("/api/v1/codecs/update", put(handlers::codecs::update_codec).with_state(codec_state.clone()))
-            .route("/api/v1/codecs/add", post(handlers::codecs::add_codec).with_state(codec_state.clone()))
-            .route("/api/v1/codecs/remove", post(handlers::codecs::remove_codec).with_state(codec_state.clone()))
-            .route("/api/v1/codecs/reorder", post(handlers::codecs::reorder_codecs).with_state(codec_state))
+            .route(
+                "/api/v1/codecs",
+                get(handlers::codecs::list_codecs).with_state(codec_state.clone()),
+            )
+            .route(
+                "/api/v1/codecs/update",
+                put(handlers::codecs::update_codec).with_state(codec_state.clone()),
+            )
+            .route(
+                "/api/v1/codecs/add",
+                post(handlers::codecs::add_codec).with_state(codec_state.clone()),
+            )
+            .route(
+                "/api/v1/codecs/remove",
+                post(handlers::codecs::remove_codec).with_state(codec_state.clone()),
+            )
+            .route(
+                "/api/v1/codecs/reorder",
+                post(handlers::codecs::reorder_codecs).with_state(codec_state),
+            )
             // DID management endpoints
-            .route("/api/v1/dids", get(handlers::dids::list_dids).with_state(dids_state.clone()))
-            .route("/api/v1/dids/:id", get(handlers::dids::get_did).with_state(dids_state.clone()))
-            .route("/api/v1/dids", post(handlers::dids::create_did).with_state(dids_state.clone()))
-            .route("/api/v1/dids/:id", put(handlers::dids::update_did).with_state(dids_state.clone()))
-            .route("/api/v1/dids/:id", delete(handlers::dids::delete_did).with_state(dids_state.clone()))
-            .route("/api/v1/dids/reorder", post(handlers::dids::reorder_dids).with_state(dids_state))
+            .route(
+                "/api/v1/dids",
+                get(handlers::dids::list_dids).with_state(dids_state.clone()),
+            )
+            .route(
+                "/api/v1/dids/:id",
+                get(handlers::dids::get_did).with_state(dids_state.clone()),
+            )
+            .route(
+                "/api/v1/dids",
+                post(handlers::dids::create_did).with_state(dids_state.clone()),
+            )
+            .route(
+                "/api/v1/dids/:id",
+                put(handlers::dids::update_did).with_state(dids_state.clone()),
+            )
+            .route(
+                "/api/v1/dids/:id",
+                delete(handlers::dids::delete_did).with_state(dids_state.clone()),
+            )
+            .route(
+                "/api/v1/dids/reorder",
+                post(handlers::dids::reorder_dids).with_state(dids_state),
+            )
             // Extension management endpoints
-            .route("/api/v1/extensions", get(handlers::extensions::list_extensions).with_state(extensions_state.clone()))
-            .route("/api/v1/extensions/:id", get(handlers::extensions::get_extension).with_state(extensions_state.clone()))
-            .route("/api/v1/extensions", post(handlers::extensions::create_extension).with_state(extensions_state.clone()))
-            .route("/api/v1/extensions/:id", put(handlers::extensions::update_extension).with_state(extensions_state.clone()))
-            .route("/api/v1/extensions/:id", delete(handlers::extensions::delete_extension).with_state(extensions_state.clone()))
-            .route("/api/v1/extensions/reorder", post(handlers::extensions::reorder_extensions).with_state(extensions_state))
+            .route(
+                "/api/v1/extensions",
+                get(handlers::extensions::list_extensions).with_state(extensions_state.clone()),
+            )
+            .route(
+                "/api/v1/extensions/:id",
+                get(handlers::extensions::get_extension).with_state(extensions_state.clone()),
+            )
+            .route(
+                "/api/v1/extensions",
+                post(handlers::extensions::create_extension).with_state(extensions_state.clone()),
+            )
+            .route(
+                "/api/v1/extensions/:id",
+                put(handlers::extensions::update_extension).with_state(extensions_state.clone()),
+            )
+            .route(
+                "/api/v1/extensions/:id",
+                delete(handlers::extensions::delete_extension).with_state(extensions_state.clone()),
+            )
+            .route(
+                "/api/v1/extensions/reorder",
+                post(handlers::extensions::reorder_extensions).with_state(extensions_state),
+            )
             // Trunk management endpoints
-            .route("/api/v1/trunks", get(handlers::trunks::list_trunks).with_state(trunks_state.clone()))
-            .route("/api/v1/trunks/:id", get(handlers::trunks::get_trunk).with_state(trunks_state.clone()))
-            .route("/api/v1/trunks", post(handlers::trunks::create_trunk).with_state(trunks_state.clone()))
-            .route("/api/v1/trunks/:id", put(handlers::trunks::update_trunk).with_state(trunks_state.clone()))
-            .route("/api/v1/trunks/:id", delete(handlers::trunks::delete_trunk).with_state(trunks_state.clone()))
-            .route("/api/v1/trunks/reorder", post(handlers::trunks::reorder_trunks).with_state(trunks_state))
+            .route(
+                "/api/v1/trunks",
+                get(handlers::trunks::list_trunks).with_state(trunks_state.clone()),
+            )
+            .route(
+                "/api/v1/trunks/:id",
+                get(handlers::trunks::get_trunk).with_state(trunks_state.clone()),
+            )
+            .route(
+                "/api/v1/trunks",
+                post(handlers::trunks::create_trunk).with_state(trunks_state.clone()),
+            )
+            .route(
+                "/api/v1/trunks/:id",
+                put(handlers::trunks::update_trunk).with_state(trunks_state.clone()),
+            )
+            .route(
+                "/api/v1/trunks/:id",
+                delete(handlers::trunks::delete_trunk).with_state(trunks_state.clone()),
+            )
+            .route(
+                "/api/v1/trunks/reorder",
+                post(handlers::trunks::reorder_trunks).with_state(trunks_state),
+            )
             // Ring group management endpoints
-            .route("/api/v1/ring-groups", get(handlers::ring_groups::list_ring_groups).with_state(ring_groups_state.clone()))
-            .route("/api/v1/ring-groups/:id", get(handlers::ring_groups::get_ring_group).with_state(ring_groups_state.clone()))
-            .route("/api/v1/ring-groups", post(handlers::ring_groups::create_ring_group).with_state(ring_groups_state.clone()))
-            .route("/api/v1/ring-groups/:id", put(handlers::ring_groups::update_ring_group).with_state(ring_groups_state.clone()))
-            .route("/api/v1/ring-groups/:id", delete(handlers::ring_groups::delete_ring_group).with_state(ring_groups_state.clone()))
-            .route("/api/v1/ring-groups/reorder", post(handlers::ring_groups::reorder_ring_groups).with_state(ring_groups_state))
+            .route(
+                "/api/v1/ring-groups",
+                get(handlers::ring_groups::list_ring_groups).with_state(ring_groups_state.clone()),
+            )
+            .route(
+                "/api/v1/ring-groups/:id",
+                get(handlers::ring_groups::get_ring_group).with_state(ring_groups_state.clone()),
+            )
+            .route(
+                "/api/v1/ring-groups",
+                post(handlers::ring_groups::create_ring_group)
+                    .with_state(ring_groups_state.clone()),
+            )
+            .route(
+                "/api/v1/ring-groups/:id",
+                put(handlers::ring_groups::update_ring_group).with_state(ring_groups_state.clone()),
+            )
+            .route(
+                "/api/v1/ring-groups/:id",
+                delete(handlers::ring_groups::delete_ring_group)
+                    .with_state(ring_groups_state.clone()),
+            )
+            .route(
+                "/api/v1/ring-groups/reorder",
+                post(handlers::ring_groups::reorder_ring_groups).with_state(ring_groups_state),
+            )
             // Route/Dialplan management endpoints
-            .route("/api/v1/routes", get(handlers::routes::list_routes).with_state(routes_state.clone()))
-            .route("/api/v1/routes/:id", get(handlers::routes::get_route).with_state(routes_state.clone()))
-            .route("/api/v1/routes", post(handlers::routes::create_route).with_state(routes_state.clone()))
-            .route("/api/v1/routes/:id", put(handlers::routes::update_route).with_state(routes_state.clone()))
-            .route("/api/v1/routes/:id", delete(handlers::routes::delete_route).with_state(routes_state.clone()))
-            .route("/api/v1/routes/reorder", post(handlers::routes::reorder_routes).with_state(routes_state.clone()))
-            .route("/api/v1/routes/test", post(handlers::routes::test_route).with_state(routes_state))
+            .route(
+                "/api/v1/routes",
+                get(handlers::routes::list_routes).with_state(routes_state.clone()),
+            )
+            .route(
+                "/api/v1/routes/:id",
+                get(handlers::routes::get_route).with_state(routes_state.clone()),
+            )
+            .route(
+                "/api/v1/routes",
+                post(handlers::routes::create_route).with_state(routes_state.clone()),
+            )
+            .route(
+                "/api/v1/routes/:id",
+                put(handlers::routes::update_route).with_state(routes_state.clone()),
+            )
+            .route(
+                "/api/v1/routes/:id",
+                delete(handlers::routes::delete_route).with_state(routes_state.clone()),
+            )
+            .route(
+                "/api/v1/routes/reorder",
+                post(handlers::routes::reorder_routes).with_state(routes_state.clone()),
+            )
+            .route(
+                "/api/v1/routes/test",
+                post(handlers::routes::test_route).with_state(routes_state),
+            )
             // SIP Profile management endpoints
-            .route("/api/v1/sip-profiles", get(handlers::sip_profiles::list_sip_profiles).with_state(sip_profiles_state.clone()))
-            .route("/api/v1/sip-profiles/:id", get(handlers::sip_profiles::get_sip_profile).with_state(sip_profiles_state.clone()))
-            .route("/api/v1/sip-profiles", post(handlers::sip_profiles::create_sip_profile).with_state(sip_profiles_state.clone()))
-            .route("/api/v1/sip-profiles/:id", put(handlers::sip_profiles::update_sip_profile).with_state(sip_profiles_state.clone()))
-            .route("/api/v1/sip-profiles/:id", delete(handlers::sip_profiles::delete_sip_profile).with_state(sip_profiles_state.clone()))
-            .route("/api/v1/sip-profiles/reorder", post(handlers::sip_profiles::reorder_sip_profiles).with_state(sip_profiles_state));
+            .route(
+                "/api/v1/sip-profiles",
+                get(handlers::sip_profiles::list_sip_profiles)
+                    .with_state(sip_profiles_state.clone()),
+            )
+            .route(
+                "/api/v1/sip-profiles/:id",
+                get(handlers::sip_profiles::get_sip_profile).with_state(sip_profiles_state.clone()),
+            )
+            .route(
+                "/api/v1/sip-profiles",
+                post(handlers::sip_profiles::create_sip_profile)
+                    .with_state(sip_profiles_state.clone()),
+            )
+            .route(
+                "/api/v1/sip-profiles/:id",
+                put(handlers::sip_profiles::update_sip_profile)
+                    .with_state(sip_profiles_state.clone()),
+            )
+            .route(
+                "/api/v1/sip-profiles/:id",
+                delete(handlers::sip_profiles::delete_sip_profile)
+                    .with_state(sip_profiles_state.clone()),
+            )
+            .route(
+                "/api/v1/sip-profiles/reorder",
+                post(handlers::sip_profiles::reorder_sip_profiles).with_state(sip_profiles_state),
+            );
 
         // If webui_path is provided, serve static files
         if let Some(path) = webui_path {
@@ -165,7 +324,7 @@ impl CloudApi {
         let ring_groups_state = Arc::new(RwLock::new(self.ring_groups.clone()));
         let routes_state = Arc::new(RwLock::new(self.routes.clone()));
         let sip_profiles_state = Arc::new(RwLock::new(self.sip_profiles.clone()));
-        
+
         let app = Self::router(
             self.webui_path.clone(),
             acme_state,

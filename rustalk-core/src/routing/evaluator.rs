@@ -1,7 +1,7 @@
 //! Route evaluation engine for processing routing rules
 
-use super::{RouteRule, RouteAction, RouteDestination, RoutingConfig};
 use super::matcher::ConditionMatcher;
+use super::{RouteAction, RouteDestination, RouteRule, RoutingConfig};
 use regex::Regex;
 use std::sync::Arc;
 
@@ -80,7 +80,10 @@ impl RouteEvaluator {
 
         // Then check if all conditions match
         if let Some(conditions) = &route.conditions {
-            if !self.matcher.matches(conditions, &context.caller_id, &context.destination) {
+            if !self
+                .matcher
+                .matches(conditions, &context.caller_id, &context.destination)
+            {
                 return false;
             }
         }
@@ -110,8 +113,8 @@ impl RouteEvaluator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::routing::{RouteCondition, TimeCondition, DayOfWeekCondition, CallerIdCondition};
-    use crate::routing::matcher::{TimeProvider, ConditionMatcher};
+    use crate::routing::matcher::{ConditionMatcher, TimeProvider};
+    use crate::routing::{CallerIdCondition, DayOfWeekCondition, RouteCondition, TimeCondition};
     use chrono::{DateTime, TimeZone, Utc};
     use std::sync::Arc;
 
@@ -144,14 +147,14 @@ mod tests {
     fn test_simple_pattern_match() {
         let mut config = RoutingConfig::new();
         config.add_route(create_test_route("1", 10, r"^2\d{3}$")); // 2xxx extensions
-        
+
         let evaluator = RouteEvaluator::new(config);
-        
+
         let context = CallContext {
             caller_id: "+12125551234".to_string(),
             destination: "2345".to_string(),
         };
-        
+
         let result = evaluator.evaluate(&context);
         assert!(result.is_some());
         assert_eq!(result.unwrap().route_id, "1");
@@ -161,14 +164,14 @@ mod tests {
     fn test_no_match() {
         let mut config = RoutingConfig::new();
         config.add_route(create_test_route("1", 10, r"^2\d{3}$"));
-        
+
         let evaluator = RouteEvaluator::new(config);
-        
+
         let context = CallContext {
             caller_id: "+12125551234".to_string(),
             destination: "5000".to_string(),
         };
-        
+
         let result = evaluator.evaluate(&context);
         assert!(result.is_none());
     }
@@ -178,14 +181,14 @@ mod tests {
         let mut config = RoutingConfig::new();
         config.add_route(create_test_route("low", 20, r"^\d+$"));
         config.add_route(create_test_route("high", 5, r"^2\d{3}$"));
-        
+
         let evaluator = RouteEvaluator::new(config);
-        
+
         let context = CallContext {
             caller_id: "+12125551234".to_string(),
             destination: "2345".to_string(),
         };
-        
+
         // Should match the high priority route first
         let result = evaluator.evaluate(&context);
         assert!(result.is_some());
@@ -195,28 +198,28 @@ mod tests {
     #[test]
     fn test_route_with_time_condition() {
         let mut config = RoutingConfig::new();
-        
+
         let mut route = create_test_route("1", 10, r"^\d+$");
-        route.conditions = Some(vec![
-            RouteCondition::Time(TimeCondition {
-                start_time: "09:00".to_string(),
-                end_time: "17:00".to_string(),
-            })
-        ]);
+        route.conditions = Some(vec![RouteCondition::Time(TimeCondition {
+            start_time: "09:00".to_string(),
+            end_time: "17:00".to_string(),
+        })]);
         config.add_route(route);
-        
+
         // Test at 10:30 AM on Monday
         let mock_time = Utc.with_ymd_and_hms(2024, 1, 15, 10, 30, 0).unwrap();
-        let provider = Arc::new(MockTimeProvider { fixed_time: mock_time });
+        let provider = Arc::new(MockTimeProvider {
+            fixed_time: mock_time,
+        });
         let matcher = Arc::new(ConditionMatcher::with_time_provider(provider));
-        
+
         let evaluator = RouteEvaluator::with_matcher(config, matcher);
-        
+
         let context = CallContext {
             caller_id: "+12125551234".to_string(),
             destination: "2345".to_string(),
         };
-        
+
         let result = evaluator.evaluate(&context);
         assert!(result.is_some());
     }
@@ -224,25 +227,23 @@ mod tests {
     #[test]
     fn test_route_with_caller_id_condition() {
         let mut config = RoutingConfig::new();
-        
+
         let mut route = create_test_route("1", 10, r"^\d+$");
-        route.conditions = Some(vec![
-            RouteCondition::CallerId(CallerIdCondition {
-                pattern: r"^\+1".to_string(),
-                negate: false,
-            })
-        ]);
+        route.conditions = Some(vec![RouteCondition::CallerId(CallerIdCondition {
+            pattern: r"^\+1".to_string(),
+            negate: false,
+        })]);
         config.add_route(route);
-        
+
         let evaluator = RouteEvaluator::new(config);
-        
+
         // Should match US number
         let context1 = CallContext {
             caller_id: "+12125551234".to_string(),
             destination: "2345".to_string(),
         };
         assert!(evaluator.evaluate(&context1).is_some());
-        
+
         // Should not match UK number
         let context2 = CallContext {
             caller_id: "+442071234567".to_string(),
@@ -254,25 +255,25 @@ mod tests {
     #[test]
     fn test_continue_on_match() {
         let mut config = RoutingConfig::new();
-        
+
         let mut route1 = create_test_route("1", 10, r"^\d+$");
         route1.continue_on_match = true;
         route1.action = RouteAction::Continue;
         route1.destination = RouteDestination::Extension("1000".to_string());
-        
+
         let mut route2 = create_test_route("2", 20, r"^\d+$");
         route2.destination = RouteDestination::Extension("2000".to_string());
-        
+
         config.add_route(route1);
         config.add_route(route2);
-        
+
         let evaluator = RouteEvaluator::new(config);
-        
+
         let context = CallContext {
             caller_id: "+12125551234".to_string(),
             destination: "5000".to_string(),
         };
-        
+
         // Should skip first route and match second
         let result = evaluator.evaluate(&context);
         assert!(result.is_some());
@@ -288,18 +289,18 @@ mod tests {
     #[test]
     fn test_disabled_route_not_matched() {
         let mut config = RoutingConfig::new();
-        
+
         let mut route = create_test_route("1", 10, r"^\d+$");
         route.enabled = false;
         config.add_route(route);
-        
+
         let evaluator = RouteEvaluator::new(config);
-        
+
         let context = CallContext {
             caller_id: "+12125551234".to_string(),
             destination: "2345".to_string(),
         };
-        
+
         let result = evaluator.evaluate(&context);
         assert!(result.is_none());
     }
@@ -307,19 +308,19 @@ mod tests {
     #[test]
     fn test_reject_action() {
         let mut config = RoutingConfig::new();
-        
+
         let mut route = create_test_route("1", 10, r"^900\d+$"); // Block premium numbers
         route.action = RouteAction::Reject;
         route.destination = RouteDestination::Hangup;
         config.add_route(route);
-        
+
         let evaluator = RouteEvaluator::new(config);
-        
+
         let context = CallContext {
             caller_id: "+12125551234".to_string(),
             destination: "9001234567".to_string(),
         };
-        
+
         let result = evaluator.evaluate(&context);
         assert!(result.is_some());
         let matched = result.unwrap();
@@ -330,7 +331,7 @@ mod tests {
     #[test]
     fn test_multiple_conditions() {
         let mut config = RoutingConfig::new();
-        
+
         let mut route = create_test_route("1", 10, r"^\d{4}$");
         route.conditions = Some(vec![
             RouteCondition::Time(TimeCondition {
@@ -342,19 +343,21 @@ mod tests {
             }),
         ]);
         config.add_route(route);
-        
+
         // Test at 10:30 AM on Monday
         let mock_time = Utc.with_ymd_and_hms(2024, 1, 15, 10, 30, 0).unwrap();
-        let provider = Arc::new(MockTimeProvider { fixed_time: mock_time });
+        let provider = Arc::new(MockTimeProvider {
+            fixed_time: mock_time,
+        });
         let matcher = Arc::new(ConditionMatcher::with_time_provider(provider));
-        
+
         let evaluator = RouteEvaluator::with_matcher(config, matcher);
-        
+
         let context = CallContext {
             caller_id: "+12125551234".to_string(),
             destination: "2345".to_string(),
         };
-        
+
         let result = evaluator.evaluate(&context);
         assert!(result.is_some());
     }

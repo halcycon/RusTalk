@@ -116,12 +116,12 @@ impl Config {
     /// First loads from JSON, then overlays values from database
     pub async fn from_file_with_db_overlay(path: impl AsRef<Path>) -> Result<Self> {
         let mut config = Self::from_file(path).await?;
-        
+
         // If database is configured, load overlay
         if let Some(db_config) = config.database.clone() {
             config = Self::apply_db_overlay(config, &db_config).await?;
         }
-        
+
         Ok(config)
     }
 
@@ -130,12 +130,12 @@ impl Config {
         // This would connect to the database and overlay configuration values
         // For now, this is a placeholder
         tracing::info!("Database overlay from: {}", db_config.url);
-        
+
         // In a real implementation, we would:
         // 1. Connect to the database using sqlx
         // 2. Query configuration overrides
         // 3. Merge them into the config structure
-        
+
         Ok(config)
     }
 
@@ -201,7 +201,7 @@ mod tests {
         let config = Config::default();
         let json = serde_json::to_string_pretty(&config).unwrap();
         assert!(json.contains("rustalk.local"));
-        
+
         let parsed: Config = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.sip.domain, config.sip.domain);
     }

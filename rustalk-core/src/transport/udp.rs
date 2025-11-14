@@ -1,7 +1,7 @@
 //! UDP Transport implementation
 
 use super::{Transport, TransportConfig};
-use crate::sip::{Message, parser::parse_message};
+use crate::sip::{parser::parse_message, Message};
 use anyhow::Result;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -18,9 +18,9 @@ impl UdpTransport {
     pub async fn new(config: &TransportConfig) -> Result<Self> {
         let socket = UdpSocket::bind(config.bind_addr).await?;
         let local_addr = socket.local_addr()?;
-        
+
         debug!("UDP transport listening on {}", local_addr);
-        
+
         Ok(Self {
             socket: Arc::new(Mutex::new(socket)),
             local_addr,
@@ -38,25 +38,25 @@ impl Transport for UdpTransport {
 
         let socket = self.socket.lock().await;
         socket.send_to(&bytes, dest).await?;
-        
+
         debug!("Sent {} bytes to {}", bytes.len(), dest);
         Ok(())
     }
 
     async fn receive(&self) -> Result<(Message, SocketAddr)> {
         let mut buf = vec![0u8; 65535];
-        
+
         let socket = self.socket.lock().await;
         let (len, addr) = socket.recv_from(&mut buf).await?;
         drop(socket);
-        
+
         buf.truncate(len);
-        
+
         debug!("Received {} bytes from {}", len, addr);
-        
+
         let message = parse_message(&buf)
             .map_err(|e| anyhow::anyhow!("Failed to parse SIP message: {}", e))?;
-        
+
         Ok((message, addr))
     }
 

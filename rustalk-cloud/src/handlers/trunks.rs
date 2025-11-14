@@ -31,7 +31,7 @@ pub async fn get_trunk(
     State(state): State<TrunksState>,
 ) -> (StatusCode, Json<Value>) {
     let trunks = state.read().await;
-    
+
     if let Some(trunk) = trunks.iter().find(|t| t.id == id) {
         (StatusCode::OK, Json(json!(trunk)))
     } else {
@@ -50,9 +50,12 @@ pub async fn create_trunk(
     Json(payload): Json<Trunk>,
 ) -> (StatusCode, Json<Value>) {
     let mut trunks = state.write().await;
-    
+
     // Check if trunk already exists
-    if trunks.iter().any(|t| t.id == payload.id || t.name == payload.name) {
+    if trunks
+        .iter()
+        .any(|t| t.id == payload.id || t.name == payload.name)
+    {
         return (
             StatusCode::CONFLICT,
             Json(json!({
@@ -61,9 +64,9 @@ pub async fn create_trunk(
             })),
         );
     }
-    
+
     trunks.push(payload.clone());
-    
+
     (
         StatusCode::CREATED,
         Json(json!({
@@ -81,7 +84,7 @@ pub async fn update_trunk(
     Json(payload): Json<Trunk>,
 ) -> (StatusCode, Json<Value>) {
     let mut trunks = state.write().await;
-    
+
     if let Some(trunk) = trunks.iter_mut().find(|t| t.id == id) {
         *trunk = payload;
         (
@@ -108,7 +111,7 @@ pub async fn delete_trunk(
     State(state): State<TrunksState>,
 ) -> (StatusCode, Json<Value>) {
     let mut trunks = state.write().await;
-    
+
     if let Some(pos) = trunks.iter().position(|t| t.id == id) {
         trunks.remove(pos);
         (
@@ -135,10 +138,10 @@ pub async fn reorder_trunks(
     Json(payload): Json<Value>,
 ) -> (StatusCode, Json<Value>) {
     let mut trunks = state.write().await;
-    
+
     let from_index = payload["from_index"].as_u64().unwrap_or(0) as usize;
     let to_index = payload["to_index"].as_u64().unwrap_or(0) as usize;
-    
+
     if from_index >= trunks.len() || to_index >= trunks.len() {
         return (
             StatusCode::BAD_REQUEST,
@@ -148,15 +151,15 @@ pub async fn reorder_trunks(
             })),
         );
     }
-    
+
     let item = trunks.remove(from_index);
     trunks.insert(to_index, item);
-    
+
     // Update priorities based on position
     for (index, trunk) in trunks.iter_mut().enumerate() {
         trunk.priority = index as u32;
     }
-    
+
     (
         StatusCode::OK,
         Json(json!({

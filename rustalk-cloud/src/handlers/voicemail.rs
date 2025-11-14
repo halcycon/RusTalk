@@ -16,7 +16,7 @@ pub type VoicemailState = Arc<RwLock<VoicemailManager>>;
 pub async fn list_mailboxes(State(state): State<VoicemailState>) -> (StatusCode, Json<Value>) {
     let manager = state.read().await;
     let mailboxes = manager.list_mailboxes();
-    
+
     (
         StatusCode::OK,
         Json(json!({
@@ -32,7 +32,7 @@ pub async fn get_mailbox(
     State(state): State<VoicemailState>,
 ) -> (StatusCode, Json<Value>) {
     let manager = state.read().await;
-    
+
     if let Some(mailbox) = manager.get_mailbox(&mailbox_id) {
         (StatusCode::OK, Json(json!(mailbox)))
     } else {
@@ -51,7 +51,7 @@ pub async fn create_mailbox(
     Json(payload): Json<VoicemailBox>,
 ) -> (StatusCode, Json<Value>) {
     let mut manager = state.write().await;
-    
+
     match manager.add_mailbox(payload.clone()) {
         Ok(_) => (
             StatusCode::CREATED,
@@ -77,7 +77,7 @@ pub async fn delete_mailbox(
     State(state): State<VoicemailState>,
 ) -> (StatusCode, Json<Value>) {
     let mut manager = state.write().await;
-    
+
     match manager.remove_mailbox(&mailbox_id) {
         Ok(true) => (
             StatusCode::OK,
@@ -109,9 +109,9 @@ pub async fn get_messages(
     State(state): State<VoicemailState>,
 ) -> (StatusCode, Json<Value>) {
     let manager = state.read().await;
-    
+
     let messages = manager.get_messages(&mailbox_id, true);
-    
+
     (
         StatusCode::OK,
         Json(json!({
@@ -129,7 +129,7 @@ pub async fn get_mwi_status(
 ) -> (StatusCode, Json<Value>) {
     let manager = state.read().await;
     let status = manager.get_mwi_status(&mailbox_id);
-    
+
     (StatusCode::OK, Json(json!(status)))
 }
 
@@ -139,7 +139,7 @@ pub async fn mark_message_read(
     State(state): State<VoicemailState>,
 ) -> (StatusCode, Json<Value>) {
     let mut manager = state.write().await;
-    
+
     match manager.mark_message_read(&message_id) {
         Ok(_) => (
             StatusCode::OK,
@@ -164,7 +164,7 @@ pub async fn delete_message(
     State(state): State<VoicemailState>,
 ) -> (StatusCode, Json<Value>) {
     let mut manager = state.write().await;
-    
+
     match manager.delete_message(&message_id) {
         Ok(_) => (
             StatusCode::OK,
@@ -192,10 +192,10 @@ mod tests {
     async fn test_list_mailboxes() {
         let manager = VoicemailManager::new("/tmp/voicemail_test");
         let state = Arc::new(RwLock::new(manager));
-        
+
         let (status, response) = list_mailboxes(State(state)).await;
         assert_eq!(status, StatusCode::OK);
-        
+
         let value = response.0;
         assert!(value["mailboxes"].is_array());
     }
@@ -204,7 +204,7 @@ mod tests {
     async fn test_create_mailbox() {
         let manager = VoicemailManager::new("/tmp/voicemail_test");
         let state = Arc::new(RwLock::new(manager));
-        
+
         let mailbox = VoicemailBox {
             id: "test_mailbox".to_string(),
             extension: "1001".to_string(),
@@ -212,7 +212,7 @@ mod tests {
             pin: "1234".to_string(),
             ..Default::default()
         };
-        
+
         let (status, response) = create_mailbox(State(state.clone()), Json(mailbox)).await;
         assert_eq!(status, StatusCode::CREATED);
         assert!(response.0["success"].as_bool().unwrap());
@@ -221,7 +221,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_mwi_status() {
         let mut manager = VoicemailManager::new("/tmp/voicemail_test");
-        
+
         let mailbox = VoicemailBox {
             id: "1001".to_string(),
             extension: "1001".to_string(),
@@ -229,14 +229,14 @@ mod tests {
             pin: "1234".to_string(),
             ..Default::default()
         };
-        
+
         manager.add_mailbox(mailbox).unwrap();
-        
+
         let state = Arc::new(RwLock::new(manager));
-        
+
         let (status, response) = get_mwi_status(Path("1001".to_string()), State(state)).await;
         assert_eq!(status, StatusCode::OK);
-        
+
         let value = response.0;
         assert_eq!(value["new_messages"], 0);
         assert_eq!(value["old_messages"], 0);

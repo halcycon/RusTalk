@@ -1,7 +1,7 @@
 //! RusTalk CLI - Admin tool for managing RusTalk SIP servers
 
-mod console;
 mod cert;
+mod console;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -147,50 +147,62 @@ async fn main() -> Result<()> {
 
 async fn start_server(config_path: PathBuf) -> Result<()> {
     let config = Config::from_file(&config_path).await?;
-    
+
     println!("Server configuration:");
-    println!("  Bind address: {}:{}", config.server.bind_address, config.server.bind_port);
+    println!(
+        "  Bind address: {}:{}",
+        config.server.bind_address, config.server.bind_port
+    );
     println!("  SIP domain: {}", config.sip.domain);
-    
+
     let _b2bua = B2BUA::new();
-    
+
     println!("RusTalk server started successfully!");
     println!("Press Ctrl+C to stop");
-    
+
     // Keep running
     tokio::signal::ctrl_c().await?;
     println!("\nShutting down...");
-    
+
     Ok(())
 }
 
 async fn check_config(config_path: PathBuf) -> Result<()> {
     let config = Config::from_file(&config_path).await?;
-    
+
     println!("✓ Configuration is valid");
     println!("\nConfiguration details:");
     println!("  Domain: {}", config.sip.domain);
-    println!("  Bind: {}:{}", config.server.bind_address, config.server.bind_port);
+    println!(
+        "  Bind: {}:{}",
+        config.server.bind_address, config.server.bind_port
+    );
     println!("  Workers: {}", config.server.workers);
-    
+
     if let Some(db) = &config.database {
         println!("  Database: {}", db.url);
     }
-    
+
     if let Some(teams) = &config.teams {
-        println!("  Teams SBC: {} (enabled: {})", teams.sbc_fqdn, teams.enabled);
+        println!(
+            "  Teams SBC: {} (enabled: {})",
+            teams.sbc_fqdn, teams.enabled
+        );
     }
-    
+
     Ok(())
 }
 
 async fn generate_config(output_path: PathBuf) -> Result<()> {
     let config = Config::default();
     config.save_to_file(&output_path).await?;
-    
-    println!("✓ Generated sample configuration at: {}", output_path.display());
+
+    println!(
+        "✓ Generated sample configuration at: {}",
+        output_path.display()
+    );
     println!("\nEdit the file to customize your settings.");
-    
+
     Ok(())
 }
 
@@ -199,13 +211,13 @@ async fn get_status(_server: &str) -> Result<()> {
     println!("Version: 0.1.0");
     println!("Uptime: N/A");
     println!("Active calls: 0");
-    
+
     Ok(())
 }
 
 async fn list_calls(_server: &str) -> Result<()> {
     println!("Active calls: 0");
     println!("\nNo active calls");
-    
+
     Ok(())
 }

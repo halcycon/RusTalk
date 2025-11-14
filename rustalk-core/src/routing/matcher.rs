@@ -1,8 +1,8 @@
 //! Condition matching for routing rules
 
 use super::{
-    RouteCondition, TimeCondition, DayOfWeekCondition, DateRangeCondition,
-    CallerIdCondition, DestinationCondition,
+    CallerIdCondition, DateRangeCondition, DayOfWeekCondition, DestinationCondition,
+    RouteCondition, TimeCondition,
 };
 use chrono::{DateTime, Datelike, NaiveDate, NaiveTime, Timelike, Utc};
 use regex::Regex;
@@ -42,12 +42,24 @@ impl ConditionMatcher {
     }
 
     /// Check if all conditions match
-    pub fn matches(&self, conditions: &[RouteCondition], caller_id: &str, destination: &str) -> bool {
-        conditions.iter().all(|condition| self.match_condition(condition, caller_id, destination))
+    pub fn matches(
+        &self,
+        conditions: &[RouteCondition],
+        caller_id: &str,
+        destination: &str,
+    ) -> bool {
+        conditions
+            .iter()
+            .all(|condition| self.match_condition(condition, caller_id, destination))
     }
 
     /// Check if a single condition matches
-    fn match_condition(&self, condition: &RouteCondition, caller_id: &str, destination: &str) -> bool {
+    fn match_condition(
+        &self,
+        condition: &RouteCondition,
+        caller_id: &str,
+        destination: &str,
+    ) -> bool {
         match condition {
             RouteCondition::Time(tc) => self.match_time_condition(tc),
             RouteCondition::DayOfWeek(dow) => self.match_day_of_week(dow),
@@ -60,11 +72,8 @@ impl ConditionMatcher {
     /// Check if current time is within the specified time range
     fn match_time_condition(&self, condition: &TimeCondition) -> bool {
         let now = self.time_provider.now();
-        let current_time = NaiveTime::from_hms_opt(
-            now.hour(),
-            now.minute(),
-            now.second(),
-        ).unwrap_or_else(|| NaiveTime::from_hms_opt(0, 0, 0).unwrap());
+        let current_time = NaiveTime::from_hms_opt(now.hour(), now.minute(), now.second())
+            .unwrap_or_else(|| NaiveTime::from_hms_opt(0, 0, 0).unwrap());
 
         let start_time = match parse_time(&condition.start_time) {
             Ok(t) => t,
@@ -155,8 +164,7 @@ fn parse_time(time_str: &str) -> Result<NaiveTime, String> {
     let hour: u32 = parts[0].parse().map_err(|_| "Invalid hour")?;
     let minute: u32 = parts[1].parse().map_err(|_| "Invalid minute")?;
 
-    NaiveTime::from_hms_opt(hour, minute, 0)
-        .ok_or_else(|| "Invalid time values".to_string())
+    NaiveTime::from_hms_opt(hour, minute, 0).ok_or_else(|| "Invalid time values".to_string())
 }
 
 #[cfg(test)]
@@ -189,7 +197,9 @@ mod tests {
     fn test_match_time_condition() {
         // Test at 10:30 AM
         let mock_time = Utc.with_ymd_and_hms(2024, 1, 15, 10, 30, 0).unwrap();
-        let provider = Arc::new(MockTimeProvider { fixed_time: mock_time });
+        let provider = Arc::new(MockTimeProvider {
+            fixed_time: mock_time,
+        });
         let matcher = ConditionMatcher::with_time_provider(provider);
 
         let condition = TimeCondition {
@@ -211,7 +221,9 @@ mod tests {
     fn test_match_time_condition_crosses_midnight() {
         // Test at 23:00 (11 PM)
         let mock_time = Utc.with_ymd_and_hms(2024, 1, 15, 23, 0, 0).unwrap();
-        let provider = Arc::new(MockTimeProvider { fixed_time: mock_time });
+        let provider = Arc::new(MockTimeProvider {
+            fixed_time: mock_time,
+        });
         let matcher = ConditionMatcher::with_time_provider(provider);
 
         let condition = TimeCondition {
@@ -226,7 +238,9 @@ mod tests {
     fn test_match_day_of_week() {
         // Test on Monday (2024-01-15 is a Monday)
         let mock_time = Utc.with_ymd_and_hms(2024, 1, 15, 10, 0, 0).unwrap();
-        let provider = Arc::new(MockTimeProvider { fixed_time: mock_time });
+        let provider = Arc::new(MockTimeProvider {
+            fixed_time: mock_time,
+        });
         let matcher = ConditionMatcher::with_time_provider(provider);
 
         let weekday_condition = DayOfWeekCondition {
@@ -245,7 +259,9 @@ mod tests {
     #[test]
     fn test_match_date_range() {
         let mock_time = Utc.with_ymd_and_hms(2024, 6, 15, 10, 0, 0).unwrap();
-        let provider = Arc::new(MockTimeProvider { fixed_time: mock_time });
+        let provider = Arc::new(MockTimeProvider {
+            fixed_time: mock_time,
+        });
         let matcher = ConditionMatcher::with_time_provider(provider);
 
         let condition = DateRangeCondition {
@@ -301,7 +317,9 @@ mod tests {
     #[test]
     fn test_matches_all_conditions() {
         let mock_time = Utc.with_ymd_and_hms(2024, 1, 15, 10, 30, 0).unwrap(); // Monday 10:30
-        let provider = Arc::new(MockTimeProvider { fixed_time: mock_time });
+        let provider = Arc::new(MockTimeProvider {
+            fixed_time: mock_time,
+        });
         let matcher = ConditionMatcher::with_time_provider(provider);
 
         let conditions = vec![

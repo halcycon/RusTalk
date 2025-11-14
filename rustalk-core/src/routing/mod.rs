@@ -10,7 +10,7 @@
 pub mod evaluator;
 pub mod matcher;
 
-pub use evaluator::{RouteEvaluator, RouteMatch, CallContext};
+pub use evaluator::{CallContext, RouteEvaluator, RouteMatch};
 pub use matcher::{ConditionMatcher, TimeProvider};
 
 use serde::{Deserialize, Serialize};
@@ -101,9 +101,7 @@ pub struct DestinationCondition {
 impl RoutingConfig {
     /// Create a new empty routing configuration
     pub fn new() -> Self {
-        Self {
-            routes: Vec::new(),
-        }
+        Self { routes: Vec::new() }
     }
 
     /// Add a route to the configuration
@@ -132,7 +130,7 @@ mod tests {
     #[test]
     fn test_add_route_sorts_by_priority() {
         let mut config = RoutingConfig::new();
-        
+
         let route1 = RouteRule {
             id: "1".to_string(),
             name: "Route 1".to_string(),
@@ -145,7 +143,7 @@ mod tests {
             action: RouteAction::Accept,
             continue_on_match: false,
         };
-        
+
         let route2 = RouteRule {
             id: "2".to_string(),
             name: "Route 2".to_string(),
@@ -158,10 +156,10 @@ mod tests {
             action: RouteAction::Accept,
             continue_on_match: false,
         };
-        
+
         config.add_route(route1);
         config.add_route(route2);
-        
+
         assert_eq!(config.routes[0].priority, 5);
         assert_eq!(config.routes[1].priority, 10);
     }

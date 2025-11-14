@@ -5,14 +5,46 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 0.2.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
 jobs:
+  create-tag:
+    name: Create Release Tag
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    outputs:
+      tag: ${{ steps.create_tag.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create and push tag
+        id: create_tag
+        run: |
+          TAG="v${{ github.event.inputs.version }}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Release version ${{ github.event.inputs.version }}"
+          git push origin "$TAG"
+
   test:
     name: Run tests
     runs-on: ubuntu-latest
+    needs: [create-tag]
+    if: always() && (needs.create-tag.result == 'success' || needs.create-tag.result == 'skipped')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -234,29 +266,49 @@ jobs:
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [build-linux, build-macos, build-macos-arm, build-windows]
-    if: startsWith(github.ref, 'refs/tags/')
+    needs: [create-tag, build-linux, build-macos, build-macos-arm, build-windows]
+    if: always() && (needs.build-linux.result == 'success' && needs.build-macos.result == 'success' && needs.build-macos-arm.result == 'success' && needs.build-windows.result == 'success')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
+      - name: Determine tag and prerelease status
+        id: release_info
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="v${{ github.event.inputs.version }}"
+            PRERELEASE="${{ github.event.inputs.prerelease }}"
+          else
+            TAG="${{ github.ref_name }}"
+            if [[ "$TAG" =~ -rc|-beta|-alpha ]]; then
+              PRERELEASE="true"
+            else
+              PRERELEASE="false"
+            fi
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
+
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.release_info.outputs.tag }}
           draft: false
-          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
+          prerelease: ${{ steps.release_info.outputs.prerelease }}
           files: |
             artifacts/rustalk-linux-x86_64/rustalk-linux-x86_64.tar.gz
             artifacts/rustalk-macos-x86_64/rustalk-macos-x86_64.tar.gz
             artifacts/rustalk-macos-arm64/rustalk-macos-arm64.tar.gz
             artifacts/rustalk-windows-x86_64/rustalk-windows-x86_64.zip
           body: |
-            ## RusTalk Release ${{ github.ref_name }}
+            ## RusTalk Release ${{ steps.release_info.outputs.tag }}
             
             High-performance SIP B2BUA / PBX / MS-Teams-compatible SBC built in Rust.
             
