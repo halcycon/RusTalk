@@ -11,12 +11,11 @@ pub use client::{AcmeClient, AcmeConfig};
 pub use storage::{CertificateInfo, CertificateStorage};
 pub use validation::{ChallengeType, ValidationResult};
 
-use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 
 /// Certificate status information
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default)]
 pub struct CertificateStatus {
     /// Whether a valid certificate exists
     pub exists: bool,
@@ -54,14 +53,3 @@ pub struct CertificateOperationResult {
     pub certificate: Option<CertificateInfo>,
 }
 
-impl Default for CertificateStatus {
-    fn default() -> Self {
-        Self {
-            exists: false,
-            domains: Vec::new(),
-            expires_at: None,
-            days_until_expiry: None,
-            needs_renewal: false,
-        }
-    }
-}

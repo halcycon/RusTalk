@@ -7,7 +7,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::UdpSocket;
 use tokio::sync::Mutex;
-use tracing::{debug, error};
+use tracing::debug;
 
 pub struct UdpTransport {
     socket: Arc<Mutex<UdpSocket>>,

@@ -135,7 +135,7 @@ pub async fn get_mwi_status(
 
 /// Mark a message as read
 pub async fn mark_message_read(
-    Path((mailbox_id, message_id)): Path<(String, String)>,
+    Path((_mailbox_id, message_id)): Path<(String, String)>,
     State(state): State<VoicemailState>,
 ) -> (StatusCode, Json<Value>) {
     let mut manager = state.write().await;
@@ -160,7 +160,7 @@ pub async fn mark_message_read(
 
 /// Delete a voicemail message
 pub async fn delete_message(
-    Path((mailbox_id, message_id)): Path<(String, String)>,
+    Path((_mailbox_id, message_id)): Path<(String, String)>,
     State(state): State<VoicemailState>,
 ) -> (StatusCode, Json<Value>) {
     let mut manager = state.write().await;

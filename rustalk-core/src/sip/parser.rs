@@ -4,11 +4,11 @@ use super::{Header, Message, Method, Request, Response, StatusCode, Uri};
 use bytes::Bytes;
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_until, take_while, take_while1},
+    bytes::complete::{tag, take_until, take_while1},
     character::complete::{char, digit1, line_ending, space1},
     combinator::{map, map_res, opt},
     multi::many0,
-    sequence::{delimited, preceded, separated_pair, terminated, tuple},
+    sequence::{preceded, separated_pair, terminated, tuple},
     IResult,
 };
 

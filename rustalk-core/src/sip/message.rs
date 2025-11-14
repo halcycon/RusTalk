@@ -2,7 +2,6 @@
 
 use super::{Header, Method, StatusCode, Uri};
 use bytes::Bytes;
-use std::collections::HashMap;
 
 /// SIP Message - either a Request or Response
 #[derive(Debug, Clone)]

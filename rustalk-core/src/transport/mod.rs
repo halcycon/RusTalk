@@ -4,9 +4,6 @@ use crate::sip::Message;
 use anyhow::Result;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tokio::net::UdpSocket;
-use tokio::sync::mpsc;
-use tracing::{debug, error, info};
 
 pub mod tls;
 pub mod udp;
@@ -49,6 +46,7 @@ pub trait Transport: Send + Sync {
 
 /// Transport layer manager
 pub struct TransportLayer {
+    #[allow(dead_code)]
     config: TransportConfig,
     transport: Arc<dyn Transport>,
 }
