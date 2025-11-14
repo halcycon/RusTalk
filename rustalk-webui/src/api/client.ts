@@ -152,4 +152,190 @@ export const reorderCodecs = async (request: CodecReorderRequest): Promise<{ suc
   return response.data;
 };
 
+// DID management API calls
+export const getDids = async (): Promise<import('../types').DidListResponse> => {
+  const response = await api.get('/dids');
+  return response.data;
+};
+
+export const getDid = async (id: string): Promise<import('../types').Did> => {
+  const response = await api.get(`/dids/${id}`);
+  return response.data;
+};
+
+export const createDid = async (did: import('../types').Did): Promise<{ success: boolean; message: string; id: string }> => {
+  const response = await api.post('/dids', did);
+  return response.data;
+};
+
+export const updateDid = async (id: string, did: import('../types').Did): Promise<{ success: boolean; message: string }> => {
+  const response = await api.put(`/dids/${id}`, did);
+  return response.data;
+};
+
+export const deleteDid = async (id: string): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete(`/dids/${id}`);
+  return response.data;
+};
+
+export const reorderDids = async (request: import('../types').ReorderRequest): Promise<{ success: boolean; message: string; dids: any[] }> => {
+  const response = await api.post('/dids/reorder', request);
+  return response.data;
+};
+
+// Extension management API calls
+export const getExtensions = async (): Promise<import('../types').ExtensionListResponse> => {
+  const response = await api.get('/extensions');
+  return response.data;
+};
+
+export const getExtension = async (id: string): Promise<import('../types').Extension> => {
+  const response = await api.get(`/extensions/${id}`);
+  return response.data;
+};
+
+export const createExtension = async (extension: import('../types').Extension): Promise<{ success: boolean; message: string; id: string }> => {
+  const response = await api.post('/extensions', extension);
+  return response.data;
+};
+
+export const updateExtension = async (id: string, extension: import('../types').Extension): Promise<{ success: boolean; message: string }> => {
+  const response = await api.put(`/extensions/${id}`, extension);
+  return response.data;
+};
+
+export const deleteExtension = async (id: string): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete(`/extensions/${id}`);
+  return response.data;
+};
+
+export const reorderExtensions = async (request: import('../types').ReorderRequest): Promise<{ success: boolean; message: string; extensions: any[] }> => {
+  const response = await api.post('/extensions/reorder', request);
+  return response.data;
+};
+
+// Trunk management API calls
+export const getTrunks = async (): Promise<import('../types').TrunkListResponse> => {
+  const response = await api.get('/trunks');
+  return response.data;
+};
+
+export const getTrunk = async (id: string): Promise<import('../types').Trunk> => {
+  const response = await api.get(`/trunks/${id}`);
+  return response.data;
+};
+
+export const createTrunk = async (trunk: import('../types').Trunk): Promise<{ success: boolean; message: string; id: string }> => {
+  const response = await api.post('/trunks', trunk);
+  return response.data;
+};
+
+export const updateTrunk = async (id: string, trunk: import('../types').Trunk): Promise<{ success: boolean; message: string }> => {
+  const response = await api.put(`/trunks/${id}`, trunk);
+  return response.data;
+};
+
+export const deleteTrunk = async (id: string): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete(`/trunks/${id}`);
+  return response.data;
+};
+
+export const reorderTrunks = async (request: import('../types').ReorderRequest): Promise<{ success: boolean; message: string; trunks: any[] }> => {
+  const response = await api.post('/trunks/reorder', request);
+  return response.data;
+};
+
+// Ring Group management API calls
+export const getRingGroups = async (): Promise<import('../types').RingGroupListResponse> => {
+  const response = await api.get('/ring-groups');
+  return response.data;
+};
+
+export const getRingGroup = async (id: string): Promise<import('../types').RingGroup> => {
+  const response = await api.get(`/ring-groups/${id}`);
+  return response.data;
+};
+
+export const createRingGroup = async (ringGroup: import('../types').RingGroup): Promise<{ success: boolean; message: string; id: string }> => {
+  const response = await api.post('/ring-groups', ringGroup);
+  return response.data;
+};
+
+export const updateRingGroup = async (id: string, ringGroup: import('../types').RingGroup): Promise<{ success: boolean; message: string }> => {
+  const response = await api.put(`/ring-groups/${id}`, ringGroup);
+  return response.data;
+};
+
+export const deleteRingGroup = async (id: string): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete(`/ring-groups/${id}`);
+  return response.data;
+};
+
+export const reorderRingGroups = async (request: import('../types').ReorderRequest): Promise<{ success: boolean; message: string; ring_groups: any[] }> => {
+  const response = await api.post('/ring-groups/reorder', request);
+  return response.data;
+};
+
+// Route management API calls
+export const getRoutes = async (): Promise<import('../types').RouteListResponse> => {
+  const response = await api.get('/routes');
+  return response.data;
+};
+
+export const getRoute = async (id: string): Promise<import('../types').Route> => {
+  const response = await api.get(`/routes/${id}`);
+  return response.data;
+};
+
+export const createRoute = async (route: import('../types').Route): Promise<{ success: boolean; message: string; id: string }> => {
+  const response = await api.post('/routes', route);
+  return response.data;
+};
+
+export const updateRoute = async (id: string, route: import('../types').Route): Promise<{ success: boolean; message: string }> => {
+  const response = await api.put(`/routes/${id}`, route);
+  return response.data;
+};
+
+export const deleteRoute = async (id: string): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete(`/routes/${id}`);
+  return response.data;
+};
+
+export const reorderRoutes = async (request: import('../types').ReorderRequest): Promise<{ success: boolean; message: string; routes: any[] }> => {
+  const response = await api.post('/routes/reorder', request);
+  return response.data;
+};
+
+// SIP Profile management API calls
+export const getSipProfiles = async (): Promise<import('../types').SipProfileListResponse> => {
+  const response = await api.get('/sip-profiles');
+  return response.data;
+};
+
+export const getSipProfile = async (id: string): Promise<import('../types').SipProfile> => {
+  const response = await api.get(`/sip-profiles/${id}`);
+  return response.data;
+};
+
+export const createSipProfile = async (profile: import('../types').SipProfile): Promise<{ success: boolean; message: string; id: string }> => {
+  const response = await api.post('/sip-profiles', profile);
+  return response.data;
+};
+
+export const updateSipProfile = async (id: string, profile: import('../types').SipProfile): Promise<{ success: boolean; message: string }> => {
+  const response = await api.put(`/sip-profiles/${id}`, profile);
+  return response.data;
+};
+
+export const deleteSipProfile = async (id: string): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete(`/sip-profiles/${id}`);
+  return response.data;
+};
+
+export const reorderSipProfiles = async (request: import('../types').ReorderRequest): Promise<{ success: boolean; message: string; sip_profiles: any[] }> => {
+  const response = await api.post('/sip-profiles/reorder', request);
+  return response.data;
+};
+
 export default api;
