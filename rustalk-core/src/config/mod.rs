@@ -6,6 +6,7 @@ use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use tokio::fs;
 
+use crate::acl::AclManager;
 use crate::media::CodecConfig;
 use crate::routing::RoutingConfig;
 
@@ -20,6 +21,7 @@ pub struct Config {
     pub acme: Option<AcmeConfig>,
     pub codecs: Option<CodecConfig>,
     pub routing: Option<RoutingConfig>,
+    pub acls: Option<AclManager>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -178,6 +180,7 @@ impl Default for Config {
             acme: None,
             codecs: Some(CodecConfig::default()),
             routing: Some(RoutingConfig::default()),
+            acls: Some(crate::acl::create_default_acls()),
         }
     }
 }

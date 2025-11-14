@@ -8,6 +8,7 @@ use axum::{
 use serde_json::{json, Value};
 
 
+pub mod acls;
 pub mod certificates;
 pub mod call_logs;
 pub mod codecs;
