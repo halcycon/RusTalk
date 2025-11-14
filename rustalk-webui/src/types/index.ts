@@ -202,3 +202,36 @@ export interface CallLogExportRequest {
   end_date?: number;
   include_charges: boolean;
 }
+
+// Codec types
+export interface Codec {
+  name: string;
+  payload_type: number;
+  clock_rate: number;
+  channels: number;
+  description: string;
+  enabled: boolean;
+  is_standard: boolean;
+}
+
+export interface CodecListResponse {
+  codecs: Codec[];
+  total: number;
+}
+
+export interface CodecUpdateRequest {
+  name: string;
+  enabled: boolean;
+}
+
+export interface CodecAddRequest {
+  name: string;
+  payload_type: number;
+  clock_rate: number;
+  channels: number;
+  description: string;
+}
+
+export interface CodecRemoveRequest {
+  name: string;
+}

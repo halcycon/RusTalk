@@ -25,6 +25,7 @@ import {
   Security as SecurityIcon,
   History as HistoryIcon,
   AttachMoney as AttachMoneyIcon,
+  GraphicEq as CodecIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useThemeMode } from '../theme';
@@ -41,6 +42,7 @@ const menuItems = [
   { text: 'Call Logs', icon: <HistoryIcon />, path: '/call-logs' },
   { text: 'Rates', icon: <AttachMoneyIcon />, path: '/rates' },
   { text: 'Statistics', icon: <BarChartIcon />, path: '/stats' },
+  { text: 'Codecs', icon: <CodecIcon />, path: '/codecs' },
   { text: 'Certificates', icon: <SecurityIcon />, path: '/certificates' },
   { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },
 ];

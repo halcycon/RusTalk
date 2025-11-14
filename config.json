@@ -46,5 +46,99 @@
     "http_challenge_port": 80,
     "challenge_type": "http-01",
     "auto_renew_days": 30
+  },
+  "codecs": {
+    "codecs": [
+      {
+        "name": "PCMU",
+        "payload_type": 0,
+        "clock_rate": 8000,
+        "channels": 1,
+        "description": "G.711 μ-law (64 kbps)",
+        "enabled": true,
+        "is_standard": true
+      },
+      {
+        "name": "PCMA",
+        "payload_type": 8,
+        "clock_rate": 8000,
+        "channels": 1,
+        "description": "G.711 A-law (64 kbps)",
+        "enabled": true,
+        "is_standard": true
+      },
+      {
+        "name": "G722",
+        "payload_type": 9,
+        "clock_rate": 8000,
+        "channels": 1,
+        "description": "G.722 wideband (64 kbps)",
+        "enabled": true,
+        "is_standard": true
+      },
+      {
+        "name": "GSM",
+        "payload_type": 3,
+        "clock_rate": 8000,
+        "channels": 1,
+        "description": "GSM Full Rate (13 kbps)",
+        "enabled": true,
+        "is_standard": true
+      },
+      {
+        "name": "G729",
+        "payload_type": 18,
+        "clock_rate": 8000,
+        "channels": 1,
+        "description": "G.729 (8 kbps)",
+        "enabled": true,
+        "is_standard": true
+      },
+      {
+        "name": "iLBC",
+        "payload_type": 97,
+        "clock_rate": 8000,
+        "channels": 1,
+        "description": "Internet Low Bitrate Codec (13.33/15.2 kbps)",
+        "enabled": true,
+        "is_standard": true
+      },
+      {
+        "name": "opus",
+        "payload_type": 111,
+        "clock_rate": 48000,
+        "channels": 2,
+        "description": "Opus codec (6-510 kbps)",
+        "enabled": true,
+        "is_standard": true
+      },
+      {
+        "name": "AMR",
+        "payload_type": 96,
+        "clock_rate": 8000,
+        "channels": 1,
+        "description": "Adaptive Multi-Rate narrowband (4.75-12.2 kbps)",
+        "enabled": true,
+        "is_standard": true
+      },
+      {
+        "name": "AMR-WB",
+        "payload_type": 98,
+        "clock_rate": 16000,
+        "channels": 1,
+        "description": "Adaptive Multi-Rate wideband (6.6-23.85 kbps)",
+        "enabled": true,
+        "is_standard": true
+      },
+      {
+        "name": "SILK",
+        "payload_type": 99,
+        "clock_rate": 16000,
+        "channels": 1,
+        "description": "Skype SILK codec (6-40 kbps)",
+        "enabled": true,
+        "is_standard": true
+      }
+    ]
   }
 }

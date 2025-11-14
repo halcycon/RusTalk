@@ -8,6 +8,7 @@ import Statistics from './pages/Statistics';
 import Configuration from './pages/Configuration';
 import Certificates from './pages/Certificates';
 import RatesManagement from './pages/RatesManagement';
+import Codecs from './pages/Codecs';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/config" element={<Configuration />} />
             <Route path="/certificates" element={<Certificates />} />
             <Route path="/rates" element={<RatesManagement />} />
+            <Route path="/codecs" element={<Codecs />} />
           </Routes>
         </Layout>
       </Router>
