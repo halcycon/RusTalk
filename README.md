@@ -41,6 +41,22 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 
 ### Installation
 
+#### Option 1: Download Pre-built Binaries (Recommended)
+
+Download the latest release for your platform from the [Releases page](https://github.com/halcycon/RusTalk/releases):
+
+```bash
+# Linux / macOS
+tar xzf rustalk-*.tar.gz
+cd rustalk-*
+./rustalk --help
+
+# Windows
+# Extract the .zip file and run rustalk.exe
+```
+
+#### Option 2: Build from Source
+
 ```bash
 # Clone the repository
 git clone https://github.com/halcycon/RusTalk.git
@@ -365,6 +381,21 @@ RusTalk supports PostgreSQL for configuration overlay and persistence:
 ```
 
 Configuration values in the database override those in config.json, allowing centralized management.
+
+## Releases
+
+RusTalk uses automated GitHub Actions workflows for building and releasing binaries for multiple platforms. Pre-built binaries are available on the [Releases page](https://github.com/halcycon/RusTalk/releases).
+
+### Supported Platforms
+
+- Linux x86_64 (`.tar.gz`)
+- macOS x86_64 (`.tar.gz`)
+- macOS ARM64 / Apple Silicon (`.tar.gz`)
+- Windows x86_64 (`.zip`)
+
+### Creating a Release
+
+See [RELEASE.md](RELEASE.md) for detailed instructions on creating and publishing releases.
 
 ## Contributing
 

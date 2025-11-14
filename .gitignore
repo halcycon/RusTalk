@@ -24,3 +24,8 @@ target
 rustalk-webui/dist
 rustalk-webui/node_modules
 rustalk-webui/.vite
+
+# Release artifacts
+release/
+*.tar.gz
+*.zip
