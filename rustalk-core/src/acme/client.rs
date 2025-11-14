@@ -68,10 +68,8 @@ impl AcmeClient {
         let account = self.get_or_create_account().await?;
 
         // Create a new order
-        let identifiers: Vec<Identifier> = domains
-            .iter()
-            .map(|d| Identifier::Dns(d.clone()))
-            .collect();
+        let identifiers: Vec<Identifier> =
+            domains.iter().map(|d| Identifier::Dns(d.clone())).collect();
 
         let mut order = account
             .new_order(&NewOrder {
@@ -84,7 +82,7 @@ impl AcmeClient {
 
         // Process authorizations
         let authorizations = order.authorizations().await?;
-        
+
         for authz in authorizations {
             let domain = match &authz.identifier {
                 Identifier::Dns(domain) => domain.clone(),
@@ -107,10 +105,9 @@ impl AcmeClient {
             let key_authorization = order.key_authorization(challenge).as_str().to_string();
 
             // Set up challenge validation
-            let validator = ChallengeValidator::new(challenge_type.clone(), self.config.http_challenge_port);
-            validator
-                .setup(&domain, &token, &key_authorization)
-                .await?;
+            let validator =
+                ChallengeValidator::new(challenge_type.clone(), self.config.http_challenge_port);
+            validator.setup(&domain, &token, &key_authorization).await?;
 
             // Notify Let's Encrypt that we're ready
             order.set_challenge_ready(&challenge.url).await?;
@@ -124,13 +121,14 @@ impl AcmeClient {
                 attempts += 1;
 
                 let mut updated_order = account.order(order.url().to_string()).await?;
-                
+
                 // Check if this authorization is valid by checking order authorizations
                 let authzs = updated_order.authorizations().await?;
-                let authz = authzs.iter().find(|a| {
-                    matches!(&a.identifier, Identifier::Dns(d) if d == &domain)
-                }).ok_or_else(|| anyhow::anyhow!("Authorization not found for {}", domain))?;
-                
+                let authz = authzs
+                    .iter()
+                    .find(|a| matches!(&a.identifier, Identifier::Dns(d) if d == &domain))
+                    .ok_or_else(|| anyhow::anyhow!("Authorization not found for {}", domain))?;
+
                 match authz.status {
                     AuthorizationStatus::Valid => {
                         info!("Authorization valid for {}", domain);
@@ -207,10 +205,10 @@ impl AcmeClient {
     /// Renew an existing certificate
     pub async fn renew_certificate(&self, domain: &str) -> Result<()> {
         info!("Renewing certificate for domain: {}", domain);
-        
+
         // Get existing certificate info to retrieve all domains
         let cert_info = self.storage.get_certificate_info(domain).await?;
-        
+
         // Request new certificate with same domains
         self.request_certificate(cert_info.domains, ChallengeType::Http01)
             .await
@@ -241,7 +239,7 @@ impl AcmeClient {
         } else {
             LetsEncrypt::Production.url()
         };
-        
+
         let (account, credentials) = Account::create(
             &NewAccount {
                 contact: &[&contact_email],

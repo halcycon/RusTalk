@@ -68,11 +68,11 @@ pub enum ModuleActionType {
 /// Parse a console command from input string
 pub fn parse_command(input: &str) -> Result<ConsoleCommand> {
     let parts: Vec<&str> = input.trim().split_whitespace().collect();
-    
+
     if parts.is_empty() {
         anyhow::bail!("Empty command");
     }
-    
+
     match parts[0].to_lowercase().as_str() {
         "help" | "?" => Ok(ConsoleCommand::Help),
         "exit" | "quit" | "q" => Ok(ConsoleCommand::Exit),
@@ -81,7 +81,10 @@ pub fn parse_command(input: &str) -> Result<ConsoleCommand> {
         "load" => parse_load_command(&parts[1..]),
         "unload" => parse_unload_command(&parts[1..]),
         "reload" => parse_reload_command(&parts[1..]),
-        cmd => anyhow::bail!("Unknown command: {}. Type 'help' for available commands.", cmd),
+        cmd => anyhow::bail!(
+            "Unknown command: {}. Type 'help' for available commands.",
+            cmd
+        ),
     }
 }
 
@@ -89,7 +92,7 @@ fn parse_show_command(args: &[&str]) -> Result<ConsoleCommand> {
     if args.is_empty() {
         anyhow::bail!("show command requires a target (acls, profiles, status, calls)");
     }
-    
+
     let target = match args[0].to_lowercase().as_str() {
         "acls" | "acl" => ShowTarget::Acls,
         "profiles" | "profile" => ShowTarget::Profiles,
@@ -97,7 +100,7 @@ fn parse_show_command(args: &[&str]) -> Result<ConsoleCommand> {
         "calls" | "call" => ShowTarget::Calls,
         other => anyhow::bail!("Unknown show target: {}", other),
     };
-    
+
     Ok(ConsoleCommand::Show(target))
 }
 
@@ -105,7 +108,7 @@ fn parse_profile_command(args: &[&str]) -> Result<ConsoleCommand> {
     if args.len() < 2 {
         anyhow::bail!("profile command requires: profile <name> <action>");
     }
-    
+
     let name = args[0].to_string();
     let action = match args[1].to_lowercase().as_str() {
         "start" => ProfileActionType::Start,
@@ -114,7 +117,7 @@ fn parse_profile_command(args: &[&str]) -> Result<ConsoleCommand> {
         "rescan" => ProfileActionType::Rescan,
         other => anyhow::bail!("Unknown profile action: {}", other),
     };
-    
+
     Ok(ConsoleCommand::Profile(ProfileAction { name, action }))
 }
 
@@ -122,7 +125,7 @@ fn parse_load_command(args: &[&str]) -> Result<ConsoleCommand> {
     if args.is_empty() {
         anyhow::bail!("load command requires a module name");
     }
-    
+
     Ok(ConsoleCommand::Module(ModuleAction {
         name: args[0].to_string(),
         action: ModuleActionType::Load,
@@ -133,7 +136,7 @@ fn parse_unload_command(args: &[&str]) -> Result<ConsoleCommand> {
     if args.is_empty() {
         anyhow::bail!("unload command requires a module name");
     }
-    
+
     Ok(ConsoleCommand::Module(ModuleAction {
         name: args[0].to_string(),
         action: ModuleActionType::Unload,
@@ -144,7 +147,7 @@ fn parse_reload_command(args: &[&str]) -> Result<ConsoleCommand> {
     if args.is_empty() {
         anyhow::bail!("reload command requires a module name");
     }
-    
+
     Ok(ConsoleCommand::Module(ModuleAction {
         name: args[0].to_string(),
         action: ModuleActionType::Reload,
@@ -212,12 +215,15 @@ async fn execute_show_command(target: ShowTarget, config_path: &PathBuf) -> Resu
         ShowTarget::Profiles => {
             println!("\nSIP Profiles:");
             println!("=============");
-            
+
             // Load config to get profile information
             if let Ok(config) = rustalk_core::Config::from_file(config_path).await {
                 println!("  [default]");
                 println!("    Domain: {}", config.sip.domain);
-                println!("    Bind: {}:{}", config.server.bind_address, config.server.bind_port);
+                println!(
+                    "    Bind: {}:{}",
+                    config.server.bind_address, config.server.bind_port
+                );
                 println!("    Protocols: {}", config.transport.protocols.join(", "));
                 println!("    Status: configured");
             } else {
@@ -291,30 +297,30 @@ pub async fn run_console(config_path: PathBuf) -> Result<()> {
     println!("===========================");
     println!("Type 'help' for available commands, 'exit' to quit");
     println!();
-    
+
     let mut rl = DefaultEditor::new()?;
-    
+
     // Load history if it exists
     let history_file = dirs::home_dir()
         .map(|p| p.join(".rustalk_history"))
         .unwrap_or_else(|| PathBuf::from(".rustalk_history"));
-    
+
     let _ = rl.load_history(&history_file);
-    
+
     loop {
         let readline = rl.readline("rustalk> ");
         match readline {
             Ok(line) => {
                 let line = line.trim();
-                
+
                 // Skip empty lines
                 if line.is_empty() {
                     continue;
                 }
-                
+
                 // Add to history
                 let _ = rl.add_history_entry(line);
-                
+
                 // Parse and execute command
                 match parse_command(line) {
                     Ok(ConsoleCommand::Exit) => {
@@ -345,31 +351,31 @@ pub async fn run_console(config_path: PathBuf) -> Result<()> {
             }
         }
     }
-    
+
     // Save history
     let _ = rl.save_history(&history_file);
-    
+
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_parse_help_command() {
         assert_eq!(parse_command("help").unwrap(), ConsoleCommand::Help);
         assert_eq!(parse_command("?").unwrap(), ConsoleCommand::Help);
         assert_eq!(parse_command("HELP").unwrap(), ConsoleCommand::Help);
     }
-    
+
     #[test]
     fn test_parse_exit_command() {
         assert_eq!(parse_command("exit").unwrap(), ConsoleCommand::Exit);
         assert_eq!(parse_command("quit").unwrap(), ConsoleCommand::Exit);
         assert_eq!(parse_command("q").unwrap(), ConsoleCommand::Exit);
     }
-    
+
     #[test]
     fn test_parse_show_commands() {
         assert!(matches!(
@@ -389,7 +395,7 @@ mod tests {
             ConsoleCommand::Show(ShowTarget::Calls)
         ));
     }
-    
+
     #[test]
     fn test_parse_profile_commands() {
         let cmd = parse_command("profile default start").unwrap();
@@ -399,7 +405,7 @@ mod tests {
         } else {
             panic!("Expected Profile command");
         }
-        
+
         let cmd = parse_command("profile external restart").unwrap();
         if let ConsoleCommand::Profile(action) = cmd {
             assert_eq!(action.name, "external");
@@ -408,7 +414,7 @@ mod tests {
             panic!("Expected Profile command");
         }
     }
-    
+
     #[test]
     fn test_parse_module_commands() {
         let cmd = parse_command("load mod_sofia").unwrap();
@@ -418,7 +424,7 @@ mod tests {
         } else {
             panic!("Expected Module command");
         }
-        
+
         let cmd = parse_command("unload mod_conference").unwrap();
         if let ConsoleCommand::Module(action) = cmd {
             assert_eq!(action.name, "mod_conference");
@@ -426,7 +432,7 @@ mod tests {
         } else {
             panic!("Expected Module command");
         }
-        
+
         let cmd = parse_command("reload mod_sofia").unwrap();
         if let ConsoleCommand::Module(action) = cmd {
             assert_eq!(action.name, "mod_sofia");
@@ -435,7 +441,7 @@ mod tests {
             panic!("Expected Module command");
         }
     }
-    
+
     #[test]
     fn test_invalid_commands() {
         assert!(parse_command("invalid").is_err());

@@ -1,7 +1,7 @@
 //! TLS/mTLS Transport implementation for secure SIP (SIPS)
 
 use super::{Transport, TransportConfig};
-use crate::sip::{Message, parser::parse_message};
+use crate::sip::{parser::parse_message, Message};
 use anyhow::Result;
 use rustls::{ClientConfig, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
@@ -20,8 +20,14 @@ pub struct TlsTransport {
 impl TlsTransport {
     pub async fn new(config: &TransportConfig) -> Result<Self> {
         let server_config = Self::load_server_config(
-            config.cert_path.as_ref().ok_or_else(|| anyhow::anyhow!("Missing cert_path"))?,
-            config.key_path.as_ref().ok_or_else(|| anyhow::anyhow!("Missing key_path"))?,
+            config
+                .cert_path
+                .as_ref()
+                .ok_or_else(|| anyhow::anyhow!("Missing cert_path"))?,
+            config
+                .key_path
+                .as_ref()
+                .ok_or_else(|| anyhow::anyhow!("Missing key_path"))?,
         )?;
 
         info!("TLS transport configured for {}", config.bind_addr);
@@ -36,16 +42,16 @@ impl TlsTransport {
         // Load certificate chain
         let cert_file = File::open(cert_path)?;
         let mut cert_reader = BufReader::new(cert_file);
-        let cert_chain: Vec<_> = certs(&mut cert_reader)
-            .collect::<Result<_, _>>()?;
+        let cert_chain: Vec<_> = certs(&mut cert_reader).collect::<Result<_, _>>()?;
 
         // Load private key
         let key_file = File::open(key_path)?;
         let mut key_reader = BufReader::new(key_file);
-        let keys: Vec<_> = pkcs8_private_keys(&mut key_reader)
-            .collect::<Result<_, _>>()?;
-        
-        let private_key = keys.into_iter().next()
+        let keys: Vec<_> = pkcs8_private_keys(&mut key_reader).collect::<Result<_, _>>()?;
+
+        let private_key = keys
+            .into_iter()
+            .next()
             .ok_or_else(|| anyhow::anyhow!("No private key found"))?;
 
         let config = ServerConfig::builder()
@@ -80,7 +86,7 @@ impl Transport for TlsTransport {
         // TLS receiving implementation
         // This is simplified - actual implementation would accept TLS connections
         debug!("TLS receive (simplified)");
-        
+
         // Placeholder for now
         Err(anyhow::anyhow!("TLS receive not fully implemented"))
     }

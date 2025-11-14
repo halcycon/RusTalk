@@ -102,7 +102,7 @@ mod tests {
         let config = SrtpConfig::new()
             .enable()
             .with_crypto_suite("AES_CM_128_HMAC_SHA1_80".to_string());
-        
+
         let attr = config.to_crypto_attribute(1);
         assert!(attr.contains("AES_CM_128_HMAC_SHA1_80"));
     }

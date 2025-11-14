@@ -34,14 +34,19 @@ async fn request_certificate(
     println!("🔐 Requesting Let's Encrypt certificate");
     println!("   Domains: {}", domains.join(", "));
     println!("   Email: {}", email);
-    println!("   Environment: {}", if staging { "Staging" } else { "Production" });
+    println!(
+        "   Environment: {}",
+        if staging { "Staging" } else { "Production" }
+    );
     println!("   Challenge: {}", challenge_type);
     println!();
 
     // Load config to get certificate directories
     let config = Config::from_file(&config_path).await?;
     let acme_config = config.acme.as_ref().ok_or_else(|| {
-        anyhow::anyhow!("ACME configuration not found in config file. Please add an 'acme' section.")
+        anyhow::anyhow!(
+            "ACME configuration not found in config file. Please add an 'acme' section."
+        )
     })?;
 
     // Create ACME config
@@ -60,12 +65,16 @@ async fn request_certificate(
     let challenge = match challenge_type.as_str() {
         "http-01" => ChallengeType::Http01,
         "dns-01" => ChallengeType::Dns01,
-        _ => return Err(anyhow::anyhow!("Invalid challenge type. Use 'http-01' or 'dns-01'")),
+        _ => {
+            return Err(anyhow::anyhow!(
+                "Invalid challenge type. Use 'http-01' or 'dns-01'"
+            ))
+        }
     };
 
     // Request certificate
     println!("⏳ Requesting certificate from Let's Encrypt...");
-    
+
     if matches!(challenge, ChallengeType::Http01) {
         println!("⚠️  Important: This tool must be run with root privileges to bind to port 80.");
         println!("⚠️  Ensure port 80 is accessible from the internet for HTTP-01 validation.");
@@ -80,7 +89,7 @@ async fn request_certificate(
     println!("✅ Certificate issued successfully!");
     println!();
     println!("Certificate details:");
-    
+
     // Show certificate info
     let cert_info = client.storage().get_certificate_info(&domains[0]).await?;
     println!("  Certificate: {}", cert_info.cert_path.display());
@@ -101,9 +110,10 @@ async fn renew_certificate(config_path: PathBuf, domain: String) -> Result<()> {
 
     // Load config
     let config = Config::from_file(&config_path).await?;
-    let acme_config = config.acme.as_ref().ok_or_else(|| {
-        anyhow::anyhow!("ACME configuration not found in config file")
-    })?;
+    let acme_config = config
+        .acme
+        .as_ref()
+        .ok_or_else(|| anyhow::anyhow!("ACME configuration not found in config file"))?;
 
     // Create ACME config
     let acme_client_config = AcmeConfig {
@@ -119,7 +129,10 @@ async fn renew_certificate(config_path: PathBuf, domain: String) -> Result<()> {
 
     // Check if certificate exists
     if !client.storage().certificate_exists(&domain).await {
-        return Err(anyhow::anyhow!("Certificate not found for domain: {}", domain));
+        return Err(anyhow::anyhow!(
+            "Certificate not found for domain: {}",
+            domain
+        ));
     }
 
     // Check if renewal is needed
@@ -138,7 +151,7 @@ async fn renew_certificate(config_path: PathBuf, domain: String) -> Result<()> {
 
     println!("✅ Certificate renewed successfully!");
     println!();
-    
+
     // Show updated certificate info
     let cert_info = client.storage().get_certificate_info(&domain).await?;
     println!("Certificate details:");
@@ -154,9 +167,10 @@ async fn renew_certificate(config_path: PathBuf, domain: String) -> Result<()> {
 async fn certificate_status(config_path: PathBuf, domain: Option<String>) -> Result<()> {
     // Load config
     let config = Config::from_file(&config_path).await?;
-    let acme_config = config.acme.as_ref().ok_or_else(|| {
-        anyhow::anyhow!("ACME configuration not found in config file")
-    })?;
+    let acme_config = config
+        .acme
+        .as_ref()
+        .ok_or_else(|| anyhow::anyhow!("ACME configuration not found in config file"))?;
 
     // Create ACME config
     let acme_client_config = AcmeConfig {
@@ -181,32 +195,41 @@ async fn certificate_status(config_path: PathBuf, domain: Option<String>) -> Res
         }
 
         let cert_info = client.storage().get_certificate_info(&domain).await?;
-        
-        println!("  Status: {}", if cert_info.days_until_expiry > 30 {
-            "✅ Valid"
-        } else if cert_info.days_until_expiry > 0 {
-            "⚠️  Expiring soon"
-        } else {
-            "❌ Expired"
-        });
+
+        println!(
+            "  Status: {}",
+            if cert_info.days_until_expiry > 30 {
+                "✅ Valid"
+            } else if cert_info.days_until_expiry > 0 {
+                "⚠️  Expiring soon"
+            } else {
+                "❌ Expired"
+            }
+        );
         println!("  Domains: {}", cert_info.domains.join(", "));
         println!("  Certificate: {}", cert_info.cert_path.display());
         println!("  Private key: {}", cert_info.key_path.display());
         println!("  Expires: {}", cert_info.expires_at);
         println!("  Days until expiry: {}", cert_info.days_until_expiry);
         println!("  Serial: {}", cert_info.serial);
-        
+
         if cert_info.days_until_expiry < 30 && cert_info.days_until_expiry > 0 {
             println!();
-            println!("💡 Certificate should be renewed soon. Run: rustalk cert renew -d {}", domain);
+            println!(
+                "💡 Certificate should be renewed soon. Run: rustalk cert renew -d {}",
+                domain
+            );
         } else if cert_info.days_until_expiry <= 0 {
             println!();
-            println!("⚠️  Certificate has expired! Run: rustalk cert renew -d {}", domain);
+            println!(
+                "⚠️  Certificate has expired! Run: rustalk cert renew -d {}",
+                domain
+            );
         }
     } else {
         // Show status for all certificates
         let certificates = client.storage().list_certificates().await?;
-        
+
         if certificates.is_empty() {
             println!("No certificates found.");
             println!();
@@ -219,7 +242,7 @@ async fn certificate_status(config_path: PathBuf, domain: Option<String>) -> Res
 
         for domain in certificates {
             let cert_info = client.storage().get_certificate_info(&domain).await?;
-            
+
             let status = if cert_info.days_until_expiry > 30 {
                 "✅ Valid"
             } else if cert_info.days_until_expiry > 0 {
@@ -229,7 +252,10 @@ async fn certificate_status(config_path: PathBuf, domain: Option<String>) -> Res
             };
 
             println!("  {} - {}", domain, status);
-            println!("    Expires: {} ({} days)", cert_info.expires_at, cert_info.days_until_expiry);
+            println!(
+                "    Expires: {} ({} days)",
+                cert_info.expires_at, cert_info.days_until_expiry
+            );
             println!("    Domains: {}", cert_info.domains.join(", "));
             println!();
         }
@@ -242,9 +268,10 @@ async fn certificate_status(config_path: PathBuf, domain: Option<String>) -> Res
 async fn list_certificates(config_path: PathBuf) -> Result<()> {
     // Load config
     let config = Config::from_file(&config_path).await?;
-    let acme_config = config.acme.as_ref().ok_or_else(|| {
-        anyhow::anyhow!("ACME configuration not found in config file")
-    })?;
+    let acme_config = config
+        .acme
+        .as_ref()
+        .ok_or_else(|| anyhow::anyhow!("ACME configuration not found in config file"))?;
 
     // Create ACME config
     let acme_client_config = AcmeConfig {
@@ -259,7 +286,7 @@ async fn list_certificates(config_path: PathBuf) -> Result<()> {
     let client = AcmeClient::new(acme_client_config)?;
 
     let certificates = client.storage().list_certificates().await?;
-    
+
     if certificates.is_empty() {
         println!("No certificates found.");
         return Ok(());
@@ -273,13 +300,16 @@ async fn list_certificates(config_path: PathBuf) -> Result<()> {
             println!("  • {}", domain);
             println!("    Path: {}", cert_info.cert_path.display());
             println!("    Expires: {}", cert_info.expires_at);
-            println!("    Status: {}", if cert_info.days_until_expiry > 30 {
-                "Valid"
-            } else if cert_info.days_until_expiry > 0 {
-                "Expiring soon"
-            } else {
-                "Expired"
-            });
+            println!(
+                "    Status: {}",
+                if cert_info.days_until_expiry > 30 {
+                    "Valid"
+                } else if cert_info.days_until_expiry > 0 {
+                    "Expiring soon"
+                } else {
+                    "Expired"
+                }
+            );
             println!();
         }
     }

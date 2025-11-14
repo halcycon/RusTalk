@@ -1,11 +1,11 @@
 //! Teams Gateway implementation
 
 use crate::teams::TeamsConfig;
-use rustalk_core::prelude::{B2BUA, Config as CoreConfig};
 use anyhow::Result;
+use rustalk_core::prelude::{Config as CoreConfig, B2BUA};
 use std::sync::Arc;
 use tokio::time::{interval, Duration};
-use tracing::{info, error};
+use tracing::{error, info};
 
 /// Teams Gateway - SBC for Microsoft Teams Direct Routing
 pub struct TeamsGateway {
@@ -46,12 +46,15 @@ impl TeamsGateway {
     /// OPTIONS ping loop for Teams health checks
     async fn options_ping_loop(config: TeamsConfig) {
         let mut ticker = interval(Duration::from_secs(config.options_ping_interval));
-        
-        info!("Starting OPTIONS ping every {} seconds", config.options_ping_interval);
+
+        info!(
+            "Starting OPTIONS ping every {} seconds",
+            config.options_ping_interval
+        );
 
         loop {
             ticker.tick().await;
-            
+
             for proxy in &config.sip_proxies {
                 match Self::send_options_ping(proxy).await {
                     Ok(_) => {

@@ -31,7 +31,7 @@ pub async fn get_did(
     State(state): State<DidsState>,
 ) -> (StatusCode, Json<Value>) {
     let dids = state.read().await;
-    
+
     if let Some(did) = dids.iter().find(|d| d.id == id) {
         (StatusCode::OK, Json(json!(did)))
     } else {
@@ -50,9 +50,12 @@ pub async fn create_did(
     Json(payload): Json<Did>,
 ) -> (StatusCode, Json<Value>) {
     let mut dids = state.write().await;
-    
+
     // Check if DID already exists
-    if dids.iter().any(|d| d.id == payload.id || d.number == payload.number) {
+    if dids
+        .iter()
+        .any(|d| d.id == payload.id || d.number == payload.number)
+    {
         return (
             StatusCode::CONFLICT,
             Json(json!({
@@ -61,9 +64,9 @@ pub async fn create_did(
             })),
         );
     }
-    
+
     dids.push(payload.clone());
-    
+
     (
         StatusCode::CREATED,
         Json(json!({
@@ -81,7 +84,7 @@ pub async fn update_did(
     Json(payload): Json<Did>,
 ) -> (StatusCode, Json<Value>) {
     let mut dids = state.write().await;
-    
+
     if let Some(did) = dids.iter_mut().find(|d| d.id == id) {
         *did = payload;
         (
@@ -108,7 +111,7 @@ pub async fn delete_did(
     State(state): State<DidsState>,
 ) -> (StatusCode, Json<Value>) {
     let mut dids = state.write().await;
-    
+
     if let Some(pos) = dids.iter().position(|d| d.id == id) {
         dids.remove(pos);
         (
@@ -135,10 +138,10 @@ pub async fn reorder_dids(
     Json(payload): Json<Value>,
 ) -> (StatusCode, Json<Value>) {
     let mut dids = state.write().await;
-    
+
     let from_index = payload["from_index"].as_u64().unwrap_or(0) as usize;
     let to_index = payload["to_index"].as_u64().unwrap_or(0) as usize;
-    
+
     if from_index >= dids.len() || to_index >= dids.len() {
         return (
             StatusCode::BAD_REQUEST,
@@ -148,15 +151,15 @@ pub async fn reorder_dids(
             })),
         );
     }
-    
+
     let item = dids.remove(from_index);
     dids.insert(to_index, item);
-    
+
     // Update priorities based on position
     for (index, did) in dids.iter_mut().enumerate() {
         did.priority = index as u32;
     }
-    
+
     (
         StatusCode::OK,
         Json(json!({

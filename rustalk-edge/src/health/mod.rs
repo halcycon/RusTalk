@@ -47,7 +47,7 @@ impl HealthChecker {
 
     pub async fn check(&self) -> Result<HealthStatus> {
         let uptime = self.start_time.elapsed().as_secs();
-        
+
         Ok(HealthStatus {
             healthy: true,
             teams_connection: true,

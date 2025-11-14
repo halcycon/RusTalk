@@ -82,11 +82,10 @@ impl RatingEngine {
             }
 
             // Check prefix match
-            if destination.starts_with(&rate.prefix)
-                && rate.prefix.len() > best_match_length {
-                    best_match = Some(rate);
-                    best_match_length = rate.prefix.len();
-                }
+            if destination.starts_with(&rate.prefix) && rate.prefix.len() > best_match_length {
+                best_match = Some(rate);
+                best_match_length = rate.prefix.len();
+            }
         }
 
         best_match.context("No matching rate card found for destination")
@@ -118,22 +117,13 @@ mod tests {
     #[test]
     fn test_calculate_billable_duration() {
         // Test minimum charge
-        assert_eq!(
-            RatingEngine::calculate_billable_duration(5, 30, 6),
-            30
-        );
+        assert_eq!(RatingEngine::calculate_billable_duration(5, 30, 6), 30);
 
         // Test billing increment rounding
-        assert_eq!(
-            RatingEngine::calculate_billable_duration(61, 0, 6),
-            66
-        );
+        assert_eq!(RatingEngine::calculate_billable_duration(61, 0, 6), 66);
 
         // Test exact increment
-        assert_eq!(
-            RatingEngine::calculate_billable_duration(60, 0, 6),
-            60
-        );
+        assert_eq!(RatingEngine::calculate_billable_duration(60, 0, 6), 60);
     }
 
     #[test]
@@ -227,7 +217,7 @@ mod tests {
         }];
 
         let (charges, total) = RatingEngine::calculate_charges(&call_log, &rate_cards).unwrap();
-        
+
         assert_eq!(charges.len(), 2); // Connection fee + duration
         assert!(total > 0.0);
         // 0.05 connection fee + (120/60) * 0.15 = 0.05 + 0.30 = 0.35

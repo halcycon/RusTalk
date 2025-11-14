@@ -7,9 +7,9 @@
 //! - Media handling and SRTP support
 //! - OPTIONS ping for health checks
 
-pub mod teams;
 pub mod gateway;
 pub mod health;
+pub mod teams;
 
 pub use gateway::TeamsGateway;
 pub use teams::TeamsConfig;
@@ -21,6 +21,6 @@ pub async fn init() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
-    
+
     Ok(())
 }

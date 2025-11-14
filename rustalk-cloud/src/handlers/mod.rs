@@ -1,23 +1,18 @@
 //! API request handlers
 
-use axum::{
-    extract::Path,
-    http::StatusCode,
-    Json,
-};
+use axum::{extract::Path, http::StatusCode, Json};
 use serde_json::{json, Value};
 
-
 pub mod acls;
-pub mod certificates;
 pub mod call_logs;
+pub mod certificates;
 pub mod codecs;
 pub mod dids;
 pub mod extensions;
-pub mod trunks;
 pub mod ring_groups;
 pub mod routes;
 pub mod sip_profiles;
+pub mod trunks;
 pub mod voicemail;
 
 /// Health check endpoint

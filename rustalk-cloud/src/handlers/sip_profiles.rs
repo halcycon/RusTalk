@@ -31,7 +31,7 @@ pub async fn get_sip_profile(
     State(state): State<SipProfilesState>,
 ) -> (StatusCode, Json<Value>) {
     let profiles = state.read().await;
-    
+
     if let Some(profile) = profiles.iter().find(|p| p.id == id) {
         (StatusCode::OK, Json(json!(profile)))
     } else {
@@ -50,9 +50,12 @@ pub async fn create_sip_profile(
     Json(payload): Json<SipProfile>,
 ) -> (StatusCode, Json<Value>) {
     let mut profiles = state.write().await;
-    
+
     // Check if SIP profile already exists
-    if profiles.iter().any(|p| p.id == payload.id || p.name == payload.name) {
+    if profiles
+        .iter()
+        .any(|p| p.id == payload.id || p.name == payload.name)
+    {
         return (
             StatusCode::CONFLICT,
             Json(json!({
@@ -61,9 +64,9 @@ pub async fn create_sip_profile(
             })),
         );
     }
-    
+
     profiles.push(payload.clone());
-    
+
     (
         StatusCode::CREATED,
         Json(json!({
@@ -81,7 +84,7 @@ pub async fn update_sip_profile(
     Json(payload): Json<SipProfile>,
 ) -> (StatusCode, Json<Value>) {
     let mut profiles = state.write().await;
-    
+
     if let Some(profile) = profiles.iter_mut().find(|p| p.id == id) {
         *profile = payload;
         (
@@ -108,7 +111,7 @@ pub async fn delete_sip_profile(
     State(state): State<SipProfilesState>,
 ) -> (StatusCode, Json<Value>) {
     let mut profiles = state.write().await;
-    
+
     if let Some(pos) = profiles.iter().position(|p| p.id == id) {
         profiles.remove(pos);
         (
@@ -135,10 +138,10 @@ pub async fn reorder_sip_profiles(
     Json(payload): Json<Value>,
 ) -> (StatusCode, Json<Value>) {
     let mut profiles = state.write().await;
-    
+
     let from_index = payload["from_index"].as_u64().unwrap_or(0) as usize;
     let to_index = payload["to_index"].as_u64().unwrap_or(0) as usize;
-    
+
     if from_index >= profiles.len() || to_index >= profiles.len() {
         return (
             StatusCode::BAD_REQUEST,
@@ -148,15 +151,15 @@ pub async fn reorder_sip_profiles(
             })),
         );
     }
-    
+
     let item = profiles.remove(from_index);
     profiles.insert(to_index, item);
-    
+
     // Update priorities based on position
     for (index, profile) in profiles.iter_mut().enumerate() {
         profile.priority = index as u32;
     }
-    
+
     (
         StatusCode::OK,
         Json(json!({

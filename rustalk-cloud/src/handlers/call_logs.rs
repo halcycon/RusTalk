@@ -172,9 +172,7 @@ pub async fn list_rates() -> (StatusCode, Json<Value>) {
 }
 
 /// Import rates from JSON or CSV
-pub async fn import_rates(
-    Json(request): Json<RateImportRequest>,
-) -> (StatusCode, Json<Value>) {
+pub async fn import_rates(Json(request): Json<RateImportRequest>) -> (StatusCode, Json<Value>) {
     // Placeholder - would parse and save to database
     let response = RateImportResponse {
         success: true,

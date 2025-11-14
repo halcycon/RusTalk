@@ -31,7 +31,7 @@ pub async fn get_route(
     State(state): State<RoutesState>,
 ) -> (StatusCode, Json<Value>) {
     let routes = state.read().await;
-    
+
     if let Some(route) = routes.iter().find(|r| r.id == id) {
         (StatusCode::OK, Json(json!(route)))
     } else {
@@ -50,9 +50,12 @@ pub async fn create_route(
     Json(payload): Json<Route>,
 ) -> (StatusCode, Json<Value>) {
     let mut routes = state.write().await;
-    
+
     // Check if route already exists
-    if routes.iter().any(|r| r.id == payload.id || r.name == payload.name) {
+    if routes
+        .iter()
+        .any(|r| r.id == payload.id || r.name == payload.name)
+    {
         return (
             StatusCode::CONFLICT,
             Json(json!({
@@ -61,9 +64,9 @@ pub async fn create_route(
             })),
         );
     }
-    
+
     routes.push(payload.clone());
-    
+
     (
         StatusCode::CREATED,
         Json(json!({
@@ -81,7 +84,7 @@ pub async fn update_route(
     Json(payload): Json<Route>,
 ) -> (StatusCode, Json<Value>) {
     let mut routes = state.write().await;
-    
+
     if let Some(route) = routes.iter_mut().find(|r| r.id == id) {
         *route = payload;
         (
@@ -108,7 +111,7 @@ pub async fn delete_route(
     State(state): State<RoutesState>,
 ) -> (StatusCode, Json<Value>) {
     let mut routes = state.write().await;
-    
+
     if let Some(pos) = routes.iter().position(|r| r.id == id) {
         routes.remove(pos);
         (
@@ -135,10 +138,10 @@ pub async fn reorder_routes(
     Json(payload): Json<Value>,
 ) -> (StatusCode, Json<Value>) {
     let mut routes = state.write().await;
-    
+
     let from_index = payload["from_index"].as_u64().unwrap_or(0) as usize;
     let to_index = payload["to_index"].as_u64().unwrap_or(0) as usize;
-    
+
     if from_index >= routes.len() || to_index >= routes.len() {
         return (
             StatusCode::BAD_REQUEST,
@@ -148,15 +151,15 @@ pub async fn reorder_routes(
             })),
         );
     }
-    
+
     let item = routes.remove(from_index);
     routes.insert(to_index, item);
-    
+
     // Update priorities based on position
     for (index, route) in routes.iter_mut().enumerate() {
         route.priority = index as u32;
     }
-    
+
     (
         StatusCode::OK,
         Json(json!({
@@ -172,14 +175,14 @@ pub async fn test_route(
     State(state): State<RoutesState>,
     Json(payload): Json<Value>,
 ) -> (StatusCode, Json<Value>) {
-    use rustalk_core::routing::{RouteEvaluator, CallContext, RoutingConfig, RouteRule};
-    
+    use rustalk_core::routing::{CallContext, RouteEvaluator, RouteRule, RoutingConfig};
+
     let routes = state.read().await;
-    
+
     // Extract test parameters
     let caller_id = payload["caller_id"].as_str().unwrap_or("unknown");
     let destination = payload["destination"].as_str().unwrap_or("unknown");
-    
+
     // Convert API routes to routing engine format
     let mut routing_config = RoutingConfig::new();
     for route in routes.iter() {
@@ -189,14 +192,14 @@ pub async fn test_route(
             routing_config.add_route(route_rule);
         }
     }
-    
+
     // Create evaluator and test
     let evaluator = RouteEvaluator::new(routing_config);
     let context = CallContext {
         caller_id: caller_id.to_string(),
         destination: destination.to_string(),
     };
-    
+
     match evaluator.evaluate(&context) {
         Some(route_match) => (
             StatusCode::OK,
