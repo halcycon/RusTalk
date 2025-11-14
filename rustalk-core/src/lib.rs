@@ -8,6 +8,7 @@
 //! - ACME/Let's Encrypt certificate management
 
 pub mod acl;
+pub mod auth;
 pub mod sip;
 pub mod b2bua;
 pub mod transport;
@@ -21,6 +22,7 @@ pub use config::Config;
 /// Re-export commonly used types
 pub mod prelude {
     pub use crate::acl::{Acl, AclManager, AclAction, AclRule, create_default_acls};
+    pub use crate::auth::{AuthManager, DigestChallenge, DigestResponse};
     pub use crate::sip::{Message, Method, Request, Response, StatusCode};
     pub use crate::b2bua::B2BUA;
     pub use crate::transport::{Transport, TransportConfig};
