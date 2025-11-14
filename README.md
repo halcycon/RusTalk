@@ -8,12 +8,17 @@ A high-performance SIP B2BUA / PBX / MS-Teams-compatible SBC built from the grou
 - **High Performance**: Built on tokio async runtime for efficient I/O
 - **Memory Safe**: Written in Rust - no buffer overflows, no use-after-free
 - **B2BUA**: Full Back-to-Back User Agent implementation
+- **ACLs**: IP-based access control with IPv4/IPv6 CIDR support
+- **Authentication**: SIP Digest Authentication (RFC 2617) for endpoints
+- **Voicemail**: Full voicemail system with MWI (Message Waiting Indicator)
 - **Microsoft Teams**: Direct Routing support with mTLS authentication
 - **SRTP**: Secure RTP pass-through without media decryption
 - **Modular**: Separate crates for core engine, edge SBC, cloud API, and CLI
 - **Web UI**: Modern React-based admin console with real-time dashboards
 - **Configuration**: JSON-based config with PostgreSQL database overlay
 - **TLS/mTLS**: Secure SIP (SIPS) using rustls
+
+See [FEATURES.md](FEATURES.md) for a comprehensive feature comparison with FreeSWITCH.
 
 ## Architecture
 
@@ -226,7 +231,7 @@ See [rustalk-webui/README.md](rustalk-webui/README.md) for more details.
 - **BYE**: Terminate calls
 - **CANCEL**: Cancel pending requests
 - **OPTIONS**: Capability queries and health checks
-- **REGISTER**: Contact registration (planned)
+- **REGISTER**: Contact registration (with Digest Authentication)
 
 ## Microsoft Teams Integration
 
