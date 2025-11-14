@@ -30,9 +30,104 @@ import {
   Add as AddIcon,
   Delete as DeleteIcon,
   Refresh as RefreshIcon,
+  DragIndicator as DragIcon,
 } from '@mui/icons-material';
-import { getCodecs, updateCodec, addCodec, removeCodec } from '../api/client';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { getCodecs, updateCodec, addCodec, removeCodec, reorderCodecs } from '../api/client';
 import type { Codec, CodecAddRequest } from '../types';
+
+// Sortable Row Component
+interface SortableRowProps {
+  codec: Codec;
+  onToggle: (name: string, enabled: boolean) => void;
+  onRemove: (name: string, isStandard: boolean) => void;
+}
+
+function SortableRow({ codec, onToggle, onRemove }: SortableRowProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: codec.name });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <TableRow ref={setNodeRef} style={style} {...attributes}>
+      <TableCell>
+        <Box display="flex" alignItems="center" gap={1}>
+          <IconButton size="small" {...listeners} sx={{ cursor: 'grab' }}>
+            <DragIcon />
+          </IconButton>
+          <Typography variant="body1" fontWeight="bold">
+            {codec.name}
+          </Typography>
+        </Box>
+      </TableCell>
+      <TableCell>{codec.payload_type}</TableCell>
+      <TableCell>{(codec.clock_rate / 1000).toFixed(0)} kHz</TableCell>
+      <TableCell>{codec.channels}</TableCell>
+      <TableCell>
+        <Typography variant="body2" color="text.secondary">
+          {codec.description}
+        </Typography>
+      </TableCell>
+      <TableCell>
+        <Chip
+          label={codec.is_standard ? 'Standard' : 'Custom'}
+          size="small"
+          color={codec.is_standard ? 'primary' : 'secondary'}
+        />
+      </TableCell>
+      <TableCell>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={codec.enabled}
+              onChange={(e) => onToggle(codec.name, e.target.checked)}
+              color="primary"
+            />
+          }
+          label={codec.enabled ? 'Enabled' : 'Disabled'}
+        />
+      </TableCell>
+      <TableCell align="center">
+        {!codec.is_standard && (
+          <Tooltip title="Remove codec">
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => onRemove(codec.name, codec.is_standard)}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+      </TableCell>
+    </TableRow>
+  );
+}
 
 export default function Codecs() {
   const [codecs, setCodecs] = useState<Codec[]>([]);
@@ -122,6 +217,38 @@ export default function Codecs() {
     }
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = codecs.findIndex((codec) => codec.name === active.id);
+      const newIndex = codecs.findIndex((codec) => codec.name === over.id);
+
+      // Optimistically update UI
+      setCodecs((items) => arrayMove(items, oldIndex, newIndex));
+
+      try {
+        setError(null);
+        setSuccess(null);
+        const result = await reorderCodecs({ from_index: oldIndex, to_index: newIndex });
+        setCodecs(result.codecs);
+        setSuccess('Codec order updated successfully');
+      } catch (err) {
+        setError('Failed to reorder codecs');
+        console.error(err);
+        // Revert on error
+        await fetchCodecs();
+      }
+    }
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -167,80 +294,46 @@ export default function Codecs() {
                 Available Codecs
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Enable or disable audio codecs for SIP calls. Standard codecs cannot be removed, but custom codecs can be added and removed.
+                Drag and drop to reorder codec priority. Enable or disable audio codecs for SIP calls. Standard codecs cannot be removed, but custom codecs can be added and removed.
               </Typography>
 
-              <TableContainer component={Paper} variant="outlined">
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Codec Name</TableCell>
-                      <TableCell>Payload Type</TableCell>
-                      <TableCell>Clock Rate</TableCell>
-                      <TableCell>Channels</TableCell>
-                      <TableCell>Description</TableCell>
-                      <TableCell>Type</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell align="center">Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {codecs.map((codec) => (
-                      <TableRow key={codec.name}>
-                        <TableCell>
-                          <Typography variant="body1" fontWeight="bold">
-                            {codec.name}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>{codec.payload_type}</TableCell>
-                        <TableCell>{(codec.clock_rate / 1000).toFixed(0)} kHz</TableCell>
-                        <TableCell>{codec.channels}</TableCell>
-                        <TableCell>
-                          <Typography variant="body2" color="text.secondary">
-                            {codec.description}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={codec.is_standard ? 'Standard' : 'Custom'}
-                            size="small"
-                            color={codec.is_standard ? 'primary' : 'secondary'}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <FormControlLabel
-                            control={
-                              <Switch
-                                checked={codec.enabled}
-                                onChange={(e) =>
-                                  handleToggleCodec(codec.name, e.target.checked)
-                                }
-                                color="primary"
-                              />
-                            }
-                            label={codec.enabled ? 'Enabled' : 'Disabled'}
-                          />
-                        </TableCell>
-                        <TableCell align="center">
-                          {!codec.is_standard && (
-                            <Tooltip title="Remove codec">
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() =>
-                                  handleRemoveCodec(codec.name, codec.is_standard)
-                                }
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                        </TableCell>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <TableContainer component={Paper} variant="outlined">
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Codec Name</TableCell>
+                        <TableCell>Payload Type</TableCell>
+                        <TableCell>Clock Rate</TableCell>
+                        <TableCell>Channels</TableCell>
+                        <TableCell>Description</TableCell>
+                        <TableCell>Type</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell align="center">Actions</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      <SortableContext
+                        items={codecs.map((c) => c.name)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {codecs.map((codec) => (
+                          <SortableRow
+                            key={codec.name}
+                            codec={codec}
+                            onToggle={handleToggleCodec}
+                            onRemove={handleRemoveCodec}
+                          />
+                        ))}
+                      </SortableContext>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </DndContext>
             </CardContent>
           </Card>
         </Grid>

@@ -77,7 +77,8 @@ impl CloudApi {
             .route("/api/v1/codecs", get(handlers::codecs::list_codecs).with_state(codec_state.clone()))
             .route("/api/v1/codecs/update", put(handlers::codecs::update_codec).with_state(codec_state.clone()))
             .route("/api/v1/codecs/add", post(handlers::codecs::add_codec).with_state(codec_state.clone()))
-            .route("/api/v1/codecs/remove", post(handlers::codecs::remove_codec).with_state(codec_state));
+            .route("/api/v1/codecs/remove", post(handlers::codecs::remove_codec).with_state(codec_state.clone()))
+            .route("/api/v1/codecs/reorder", post(handlers::codecs::reorder_codecs).with_state(codec_state));
 
         // If webui_path is provided, serve static files
         if let Some(path) = webui_path {

@@ -38,6 +38,13 @@ pub struct CodecRemoveRequest {
     pub name: String,
 }
 
+/// Request to reorder codecs
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CodecReorderRequest {
+    pub from_index: usize,
+    pub to_index: usize,
+}
+
 /// Get all codecs
 pub async fn list_codecs(
     State(codec_config): State<Arc<RwLock<CodecConfig>>>,
@@ -153,6 +160,37 @@ pub async fn remove_codec(
     }
 }
 
+/// Reorder codecs (change priority)
+pub async fn reorder_codecs(
+    State(codec_config): State<Arc<RwLock<CodecConfig>>>,
+    Json(request): Json<CodecReorderRequest>,
+) -> (StatusCode, Json<Value>) {
+    let mut config = codec_config.write().await;
+
+    match config.reorder_codec(request.from_index, request.to_index) {
+        Ok(_) => {
+            info!("Codecs reordered: {} -> {}", request.from_index, request.to_index);
+            (
+                StatusCode::OK,
+                Json(json!({
+                    "success": true,
+                    "message": "Codecs reordered successfully",
+                    "codecs": config.codecs.clone()
+                })),
+            )
+        }
+        Err(err) => {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(json!({
+                    "success": false,
+                    "error": err
+                })),
+            )
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -247,6 +285,50 @@ mod tests {
         };
         
         let (status, response) = remove_codec(State(config), Json(request)).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(response.0["success"], false);
+    }
+
+    #[tokio::test]
+    async fn test_reorder_codecs() {
+        let config = Arc::new(RwLock::new(CodecConfig::default()));
+        
+        // Get initial first codec
+        let initial_first = {
+            let cfg = config.read().await;
+            cfg.codecs[0].name.clone()
+        };
+        
+        let request = CodecReorderRequest {
+            from_index: 2,
+            to_index: 0,
+        };
+        
+        let (status, response) = reorder_codecs(State(config.clone()), Json(request)).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(response.0["success"], true);
+        
+        // Verify order changed
+        let cfg = config.read().await;
+        assert_ne!(cfg.codecs[0].name, initial_first);
+        assert_eq!(cfg.codecs[1].name, initial_first);
+    }
+
+    #[tokio::test]
+    async fn test_reorder_codecs_invalid_index() {
+        let config = Arc::new(RwLock::new(CodecConfig::default()));
+        
+        let len = {
+            let cfg = config.read().await;
+            cfg.codecs.len()
+        };
+        
+        let request = CodecReorderRequest {
+            from_index: len + 1,
+            to_index: 0,
+        };
+        
+        let (status, response) = reorder_codecs(State(config), Json(request)).await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
         assert_eq!(response.0["success"], false);
     }

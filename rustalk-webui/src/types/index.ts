@@ -212,6 +212,7 @@ export interface Codec {
   description: string;
   enabled: boolean;
   is_standard: boolean;
+  priority?: number;
 }
 
 export interface CodecListResponse {
@@ -234,4 +235,9 @@ export interface CodecAddRequest {
 
 export interface CodecRemoveRequest {
   name: string;
+}
+
+export interface CodecReorderRequest {
+  from_index: number;
+  to_index: number;
 }

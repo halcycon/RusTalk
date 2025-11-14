@@ -20,6 +20,9 @@ pub struct Codec {
     pub enabled: bool,
     /// Whether this is a standard codec (cannot be uninstalled)
     pub is_standard: bool,
+    /// Priority/order for codec negotiation (lower number = higher priority)
+    /// If None, uses position in the list
+    pub priority: Option<u32>,
 }
 
 impl Codec {
@@ -40,6 +43,7 @@ impl Codec {
             description: description.to_string(),
             enabled: true,
             is_standard,
+            priority: None,
         }
     }
 
@@ -186,6 +190,60 @@ impl CodecConfig {
             .map(|c| format!("a=rtpmap:{}", c.rtpmap()))
             .collect()
     }
+
+    /// Reorder codecs by moving a codec to a new position
+    pub fn reorder_codec(&mut self, from_index: usize, to_index: usize) -> Result<(), String> {
+        if from_index >= self.codecs.len() {
+            return Err(format!("Invalid from_index: {}", from_index));
+        }
+        if to_index >= self.codecs.len() {
+            return Err(format!("Invalid to_index: {}", to_index));
+        }
+        
+        if from_index != to_index {
+            let codec = self.codecs.remove(from_index);
+            self.codecs.insert(to_index, codec);
+            
+            // Update priorities to reflect new order
+            self.update_priorities();
+        }
+        
+        Ok(())
+    }
+
+    /// Update priorities based on current order in the list
+    fn update_priorities(&mut self) {
+        for (index, codec) in self.codecs.iter_mut().enumerate() {
+            codec.priority = Some(index as u32);
+        }
+    }
+
+    /// Sort codecs by priority (lower number = higher priority)
+    /// Falls back to list order if priority is not set
+    pub fn sort_by_priority(&mut self) {
+        self.codecs.sort_by(|a, b| {
+            match (a.priority, b.priority) {
+                (Some(pa), Some(pb)) => pa.cmp(&pb),
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => std::cmp::Ordering::Equal,
+            }
+        });
+    }
+
+    /// Get codecs in priority order (enabled codecs first, sorted by priority)
+    pub fn get_priority_ordered(&self) -> Vec<&Codec> {
+        let mut enabled: Vec<&Codec> = self.enabled_codecs();
+        enabled.sort_by(|a, b| {
+            match (a.priority, b.priority) {
+                (Some(pa), Some(pb)) => pa.cmp(&pb),
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => std::cmp::Ordering::Equal,
+            }
+        });
+        enabled
+    }
 }
 
 impl Default for CodecConfig {
@@ -316,5 +374,68 @@ mod tests {
         let rtpmaps = config.sdp_rtpmaps();
         assert_eq!(rtpmaps.len(), 1);
         assert!(rtpmaps[0].contains("a=rtpmap:0 PCMU/8000"));
+    }
+
+    #[test]
+    fn test_reorder_codec() {
+        let mut config = CodecConfig::new();
+        let initial_first = config.codecs[0].name.clone();
+        let initial_third = config.codecs[2].name.clone();
+        
+        // Move codec from index 2 to index 0
+        assert!(config.reorder_codec(2, 0).is_ok());
+        assert_eq!(config.codecs[0].name, initial_third);
+        assert_eq!(config.codecs[1].name, initial_first);
+        
+        // Verify priorities are updated
+        assert_eq!(config.codecs[0].priority, Some(0));
+        assert_eq!(config.codecs[1].priority, Some(1));
+    }
+
+    #[test]
+    fn test_reorder_codec_invalid_index() {
+        let mut config = CodecConfig::new();
+        let len = config.codecs.len();
+        
+        // Invalid from_index
+        assert!(config.reorder_codec(len + 1, 0).is_err());
+        
+        // Invalid to_index
+        assert!(config.reorder_codec(0, len + 1).is_err());
+    }
+
+    #[test]
+    fn test_priority_ordering() {
+        let mut config = CodecConfig::new();
+        
+        // Set custom priorities
+        config.codecs[0].priority = Some(5);
+        config.codecs[1].priority = Some(2);
+        config.codecs[2].priority = Some(1);
+        
+        let ordered = config.get_priority_ordered();
+        
+        // Should be sorted by priority (lower number first)
+        assert_eq!(ordered[0].priority, Some(1));
+        assert_eq!(ordered[1].priority, Some(2));
+        assert_eq!(ordered[2].priority, Some(5));
+    }
+
+    #[test]
+    fn test_sort_by_priority() {
+        let mut config = CodecConfig::new();
+        
+        // Set reverse priorities
+        let len = config.codecs.len();
+        for (i, codec) in config.codecs.iter_mut().enumerate() {
+            codec.priority = Some((len - i) as u32);
+        }
+        
+        config.sort_by_priority();
+        
+        // After sorting, priorities should be in ascending order
+        for i in 0..config.codecs.len() - 1 {
+            assert!(config.codecs[i].priority.unwrap() < config.codecs[i + 1].priority.unwrap());
+        }
     }
 }

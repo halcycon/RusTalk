@@ -22,6 +22,7 @@ import type {
   CodecUpdateRequest,
   CodecAddRequest,
   CodecRemoveRequest,
+  CodecReorderRequest,
 } from '../types';
 
 const api = axios.create({
@@ -143,6 +144,11 @@ export const addCodec = async (request: CodecAddRequest): Promise<{ success: boo
 
 export const removeCodec = async (request: CodecRemoveRequest): Promise<{ success: boolean; message: string }> => {
   const response = await api.post('/codecs/remove', request);
+  return response.data;
+};
+
+export const reorderCodecs = async (request: CodecReorderRequest): Promise<{ success: boolean; message: string; codecs: any[] }> => {
+  const response = await api.post('/codecs/reorder', request);
   return response.data;
 };
 
